@@ -1,0 +1,51 @@
+# ===============================
+# Enterprise AI Data Analyst
+# Dependencias principales
+# ===============================
+
+# IA
+openai
+langchain
+langgraph
+
+# RAG
+faiss-cpu
+chromadb
+sentence-transformers
+
+# Machine Learning
+scikit-learn
+xgboost
+lightgbm
+
+# Ciencia de datos
+numpy
+pandas
+scipy
+
+# Visualización
+matplotlib
+plotly
+seaborn
+
+# Dashboard
+streamlit
+
+# API
+fastapi
+uvicorn
+
+# Base de datos
+sqlalchemy
+
+# Variables de entorno
+python-dotenv
+
+# Archivos
+openpyxl
+python-docx
+pypdf
+
+# Utilidades
+requests
+tqdm
