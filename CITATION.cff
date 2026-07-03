@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: Enterprise AI Data Analyst
+message: "Si utilizas este proyecto, por favor cítalo."
+authors:
+  - family-names: Arteaga
+    given-names: Edgar
+repository-code: https://github.com/arteduro/Enterprise_AI_Data_Analyst
+license: MIT
