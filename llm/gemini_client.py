@@ -13,11 +13,12 @@ from google import genai
 
 from config.settings import settings
 from config.logging_config import get_logger
+from llm.base_llm import BaseLLM
 
 logger = get_logger(__name__)
 
 
-class GeminiClient:
+class GeminiClient(BaseLLM):
     """
     Cliente para interactuar con Google Gemini.
     """

@@ -1,5 +1,6 @@
 """
 Configuración global de Enterprise AI Data Analyst
+
 Autor: Edgar Arteaga
 """
 
@@ -19,6 +20,7 @@ load_dotenv(BASE_DIR / ".env")
 # Configuración principal
 # ==============================
 
+
 class Settings:
 
     # --------------------------
@@ -29,19 +31,36 @@ class Settings:
 
     VERSION = "0.1.0"
 
-    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+    ENVIRONMENT = os.getenv(
+        "ENVIRONMENT",
+        "development"
+    )
 
-    DEBUG = os.getenv("DEBUG", "True") == "True"
+    DEBUG = os.getenv(
+        "DEBUG",
+        "True"
+    ) == "True"
+
+    # --------------------------
+    # Proveedor de IA
+    # --------------------------
+
+    MODEL_PROVIDER = os.getenv(
+        "MODEL_PROVIDER",
+        "google"
+    )
 
     # --------------------------
     # Gemini
     # --------------------------
 
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GEMINI_API_KEY = os.getenv(
+        "GEMINI_API_KEY"
+    )
 
     GEMINI_MODEL = os.getenv(
         "GEMINI_MODEL",
-        "gemini-2.5-pro"
+        "gemini-2.5-flash"
     )
 
     THINKING_LEVEL = os.getenv(
@@ -50,18 +69,26 @@ class Settings:
     )
 
     TEMPERATURE = float(
-        os.getenv("TEMPERATURE", 0.2)
+        os.getenv(
+            "TEMPERATURE",
+            0.2
+        )
     )
 
     MAX_OUTPUT_TOKENS = int(
-        os.getenv("MAX_OUTPUT_TOKENS", 8192)
+        os.getenv(
+            "MAX_OUTPUT_TOKENS",
+            8192
+        )
     )
 
     # --------------------------
     # LangSmith
     # --------------------------
 
-    LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
+    LANGSMITH_API_KEY = os.getenv(
+        "LANGSMITH_API_KEY"
+    )
 
     LANGSMITH_TRACING = os.getenv(
         "LANGSMITH_TRACING",
@@ -72,5 +99,6 @@ class Settings:
         "PROJECT_TRACE_NAME",
         PROJECT_NAME
     )
+
 
 settings = Settings()
