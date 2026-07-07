@@ -11,21 +11,35 @@ from typing import Optional
 from llm.base_llm import BaseLLM
 from llm.llm_factory import LLMFactory
 
+from core.document_loader import DocumentLoader
+from core.data_processor import DataProcessor
+from core.database import DatabaseManager
+
 
 class EnterpriseAI:
     """
-    Núcleo de Inteligencia Artificial.
+    Núcleo principal del sistema.
 
-    Esta clase abstrae completamente el proveedor
-    de IA (Gemini, OpenAI, Claude, Ollama, etc.).
+    EnterpriseAI coordina todos los componentes:
 
-    El resto del proyecto únicamente interactúa
-    con EnterpriseAI.
+    - DocumentLoader
+    - DataProcessor
+    - DatabaseManager
+    - LLM
     """
 
     def __init__(self):
 
+        # Inteligencia Artificial
         self.llm: BaseLLM = LLMFactory.create()
+
+        # Procesamiento de datos
+        self.loader = DocumentLoader()
+
+        self.processor = DataProcessor()
+
+        # Persistencia
+        self.database = DatabaseManager()
 
     def ask(
         self,
@@ -33,7 +47,7 @@ class EnterpriseAI:
         context: Optional[str] = None
     ) -> str:
         """
-        Envía una consulta al modelo LLM.
+        Envía una consulta al LLM.
         """
 
         return self.llm.generate(
@@ -43,7 +57,7 @@ class EnterpriseAI:
 
     def health_check(self) -> bool:
         """
-        Comprueba que el proveedor responde.
+        Comprueba que el proveedor IA responde.
         """
 
         return self.llm.health_check()

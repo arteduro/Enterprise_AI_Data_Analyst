@@ -10,6 +10,7 @@ from config.settings import settings
 
 from llm.base_llm import BaseLLM
 from llm.gemini_client import GeminiClient
+from llm.mock_llm import MockLLM
 from llm.provider import ModelProvider
 
 
@@ -29,6 +30,9 @@ class LLMFactory:
 
             case ModelProvider.GOOGLE:
                 return GeminiClient()
+
+            case ModelProvider.MOCK:
+                return MockLLM()
 
             case _:
                 raise ValueError(

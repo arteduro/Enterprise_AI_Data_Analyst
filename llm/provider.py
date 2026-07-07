@@ -16,6 +16,8 @@ class ModelProvider(str, Enum):
 
     GOOGLE = "google"
 
+    MOCK = "mock"
+
     OPENAI = "openai"
 
     ANTHROPIC = "anthropic"
