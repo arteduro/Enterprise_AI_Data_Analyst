@@ -1,251 +1,223 @@
 """
 core/data_processor.py
 
-Motor de análisis de datasets para Enterprise AI Data Analyst.
+Motor de análisis de datasets para
+Enterprise AI Data Analyst.
+
+Coordina todos los profilers y genera
+un AnalysisResult.
 
 Autor: Edgar Arteaga
 """
 
-from dataclasses import dataclass, field
-from typing import Any
+from __future__ import annotations
 
 import pandas as pd
 
 from config.logging_config import get_logger
+
+from core.analysis import AnalysisResult
 from core.exceptions import DatasetError
+
+from core.profilers.basic_profiler import BasicProfiler
+from core.profilers.statistics_profiler import StatisticsProfiler
+from core.profilers.quality_profiler import QualityProfiler
+from core.profilers.ml_profiler import MLProfiler
+from core.profilers.recommendation_engine import RecommendationEngine
+
 
 logger = get_logger(__name__)
 
 
 # ==========================================================
-# Perfil del Dataset
+# Procesador de datos
 # ==========================================================
 
-@dataclass
-class DatasetProfile:
-    """
-    Contiene toda la información obtenida del análisis
-    de un dataset.
-    """
-
-    rows: int = 0
-    columns: int = 0
-
-    numeric_columns: int = 0
-    categorical_columns: int = 0
-    datetime_columns: int = 0
-
-    missing_values: int = 0
-    duplicated_rows: int = 0
-
-    memory_usage_mb: float = 0.0
-
-    quality_score: float = 0.0
-
-    dtypes: dict = field(default_factory=dict)
-
-    statistics: dict = field(default_factory=dict)
-
-    recommendations: list[str] = field(default_factory=list)
-
-    summary: str = ""
-
-    ai_context: str = ""
-
-
-# ==========================================================
-# Procesador Inteligente
-# ==========================================================
 
 class DataProcessor:
     """
-    Analiza un DataFrame y genera un perfil completo.
+    Orquesta el análisis completo de un DataFrame.
 
-    Este módulo será utilizado por:
-
-    - Gemini
-    - Dashboard
-    - AutoML
-    - Reportes
-    - RAG
-    - Agentes IA
+    Coordina todos los profilers del sistema y
+    devuelve un AnalysisResult.
     """
 
-    def validate(self, df: pd.DataFrame) -> None:
+    def __init__(self) -> None:
         """
-        Valida que el DataFrame sea correcto.
+        Inicializa todos los módulos de análisis.
+        """
+
+        self.basic_profiler = BasicProfiler()
+
+        self.statistics_profiler = StatisticsProfiler()
+
+        self.quality_profiler = QualityProfiler()
+
+        self.ml_profiler = MLProfiler()
+
+        self.recommendation_engine = RecommendationEngine()
+
+    def validate(
+        self,
+        df: pd.DataFrame,
+    ) -> None:
+        """
+        Valida el DataFrame antes del análisis.
         """
 
         if df is None:
-            raise DatasetError("El DataFrame es None.")
+            raise DatasetError(
+                "El DataFrame es None."
+            )
 
         if df.empty:
-            raise DatasetError("El DataFrame está vacío.")
+            raise DatasetError(
+                "El DataFrame está vacío."
+            )
 
         if len(df.columns) == 0:
-            raise DatasetError("El DataFrame no contiene columnas.")
+            raise DatasetError(
+                "El DataFrame no contiene columnas."
+            )
 
-    def profile(self, df: pd.DataFrame) -> DatasetProfile:
+    def profile(
+        self,
+        df: pd.DataFrame,
+    ) -> AnalysisResult:
         """
-        Genera un perfil completo del dataset.
+        Ejecuta el análisis completo del DataFrame.
         """
 
         self.validate(df)
 
-        logger.info("Analizando dataset...")
-
-        profile = DatasetProfile()
-
-        profile.rows = len(df)
-
-        profile.columns = len(df.columns)
-
-        profile.numeric_columns = len(
-            df.select_dtypes(include="number").columns
+        logger.info(
+            "Analizando dataset..."
         )
 
-        profile.categorical_columns = len(
-            df.select_dtypes(include="object").columns
+        basic = self.basic_profiler.analyze(df)
+
+        statistics = self.statistics_profiler.analyze(df)
+
+        quality = self.quality_profiler.analyze(df)
+
+        ml = self.ml_profiler.analyze(df)
+
+        recommendations = (
+            self.recommendation_engine.generate(
+                basic,
+                quality,
+                ml,
+            )
         )
 
-        profile.datetime_columns = len(
-            df.select_dtypes(include="datetime").columns
+        summary = self._generate_summary(
+            basic,
+            quality,
         )
 
-        profile.missing_values = int(
-            df.isna().sum().sum()
+        ai_context = self._generate_ai_context(
+            basic,
+            quality,
+            ml,
+            recommendations,
+            summary,
         )
 
-        profile.duplicated_rows = int(
-            df.duplicated().sum()
+        result = AnalysisResult(
+            basic=basic,
+            statistics=statistics,
+            quality=quality,
+            ml=ml,
+            recommendations=recommendations,
+            summary=summary,
+            ai_context=ai_context,
         )
 
-        profile.memory_usage_mb = round(
-            df.memory_usage(deep=True).sum() / 1024 / 1024,
-            2
+        logger.info(
+            "Análisis completado correctamente."
         )
 
-        profile.dtypes = {
-            col: str(dtype)
-            for col, dtype in df.dtypes.items()
-        }
+        return result
 
-        profile.statistics = self.statistics(df)
-
-        profile.quality_score = self.quality_score(profile)
-
-        profile.recommendations = self.generate_recommendations(profile)
-
-        profile.summary = self.generate_summary(profile)
-
-        profile.ai_context = self.generate_ai_context(profile)
-
-        logger.info("Perfil generado correctamente.")
-
-        return profile
-
-    def statistics(self, df: pd.DataFrame) -> dict[str, Any]:
-        """
-        Genera estadísticas para columnas numéricas.
-        """
-
-        numeric = df.select_dtypes(include="number")
-
-        if numeric.empty:
-            return {}
-
-        return numeric.describe().to_dict()
-
-    def quality_score(self, profile: DatasetProfile) -> float:
-        """
-        Calcula un puntaje de calidad entre 0 y 100.
-        """
-
-        score = 100.0
-
-        score -= profile.missing_values * 0.05
-
-        score -= profile.duplicated_rows * 0.5
-
-        return max(round(score, 2), 0)
-
-    def generate_recommendations(
+    def _generate_summary(
         self,
-        profile: DatasetProfile
-    ) -> list[str]:
-        """
-        Genera recomendaciones automáticas.
-        """
-
-        recommendations = []
-
-        if profile.missing_values > 0:
-            recommendations.append(
-                "Existen valores nulos. Se recomienda imputarlos o eliminarlos."
-            )
-
-        if profile.duplicated_rows > 0:
-            recommendations.append(
-                "Existen filas duplicadas. Se recomienda eliminarlas."
-            )
-
-        if profile.quality_score < 80:
-            recommendations.append(
-                "La calidad del dataset es baja."
-            )
-
-        if not recommendations:
-            recommendations.append(
-                "El dataset presenta una buena calidad."
-            )
-
-        return recommendations
-
-    def generate_summary(
-        self,
-        profile: DatasetProfile
+        basic,
+        quality,
     ) -> str:
         """
-        Genera un resumen ejecutivo.
+        Genera un resumen ejecutivo del análisis.
         """
 
         return (
-            f"Dataset con {profile.rows:,} registros, "
-            f"{profile.columns} columnas y "
+            f"Dataset con {basic.rows:,} registros, "
+            f"{basic.columns} columnas y "
             f"una calidad estimada del "
-            f"{profile.quality_score:.2f}%."
+            f"{quality.quality_score:.2f}%."
+        )
+        """
+        Genera un resumen ejecutivo del análisis.
+        """
+
+        return (
+            f"Dataset con {basic.rows:,} registros, "
+            f"{basic.columns} columnas y "
+            f"una calidad estimada del "
+            f"{quality.quality_score:.2f}%."
         )
 
-    def generate_ai_context(
+    def _generate_ai_context(
         self,
-        profile: DatasetProfile
+        basic,
+        quality,
+        ml,
+        recommendations,
+        summary,
     ) -> str:
         """
         Genera el contexto que será enviado al LLM.
         """
 
+        recommendations_text = "\n".join(
+            f"- {item}"
+            for item in recommendations
+        )
+
         return f"""
 DATASET PROFILE
 
-Filas: {profile.rows}
+Filas: {basic.rows}
 
-Columnas: {profile.columns}
+Columnas: {basic.columns}
 
-Variables numéricas: {profile.numeric_columns}
+Variables numéricas: {basic.numeric_columns}
 
-Variables categóricas: {profile.categorical_columns}
+Variables categóricas: {basic.categorical_columns}
 
-Variables fecha: {profile.datetime_columns}
+Variables fecha: {basic.datetime_columns}
 
-Valores nulos: {profile.missing_values}
+Variables booleanas: {basic.boolean_columns}
 
-Duplicados: {profile.duplicated_rows}
+Uso de memoria: {basic.memory_usage_mb} MB
 
-Uso de memoria: {profile.memory_usage_mb} MB
+Valores nulos: {quality.missing_values}
 
-Calidad: {profile.quality_score:.2f} %
+Duplicados: {quality.duplicated_rows}
+
+Calidad: {quality.quality_score:.2f} %
+
+Posible variable objetivo:
+{ml.possible_target}
+
+Tipo de problema:
+{ml.problem_type}
+
+Modelos recomendados:
+{", ".join(ml.recommended_models)}
 
 Resumen:
+{summary}
 
-{profile.summary}
+Recomendaciones:
+
+{recommendations_text}
 """.strip()
