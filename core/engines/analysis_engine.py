@@ -10,6 +10,8 @@ Autor: Edgar Arteaga
 
 from __future__ import annotations
 
+import pandas as pd
+
 from config.logging_config import get_logger
 
 from core.data_processor import DataProcessor
@@ -41,6 +43,28 @@ class AnalysisEngine:
 
         self.processor = DataProcessor()
 
+    def analyze_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+    ):
+        """
+        Ejecuta el análisis completo de un DataFrame.
+        """
+
+        logger.info(
+            "Iniciando análisis del DataFrame..."
+        )
+
+        result = self.processor.profile(
+            dataframe
+        )
+
+        logger.info(
+            "Análisis del DataFrame finalizado."
+        )
+
+        return result
+
     def analyze_file(
         self,
         file_path: str,
@@ -58,12 +82,6 @@ class AnalysisEngine:
             file_path
         )
 
-        result = self.processor.profile(
+        return self.analyze_dataframe(
             dataframe
         )
-
-        logger.info(
-            "Análisis finalizado correctamente."
-        )
-
-        return result
