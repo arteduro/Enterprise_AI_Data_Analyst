@@ -59,6 +59,25 @@ class EnterpriseAI:
             context=context,
         )
 
+    def ask_file(
+        self,
+        file_path: str,
+        question: str,
+    ) -> str:
+        """
+        Analiza un archivo y utiliza el contexto
+        generado para responder una pregunta.
+        """
+
+        analysis = self.analysis_engine.analyze_file(
+            file_path
+        )
+
+        return self.ask(
+            question=question,
+            context=analysis.ai_context,
+        )
+
     def health_check(self) -> bool:
         """
         Comprueba que el proveedor IA responde.
