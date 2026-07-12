@@ -16,6 +16,8 @@ from config.logging_config import get_logger
 
 from llm.base_llm import BaseLLM
 
+from core.prompt_builder import PromptBuilder
+
 logger = get_logger(__name__)
 
 
@@ -44,6 +46,8 @@ class ChatEngine:
 
         self.llm = llm
 
+        self.prompt_builder = PromptBuilder()
+
     def ask(
         self,
         question: str,
@@ -54,12 +58,20 @@ class ChatEngine:
         """
 
         logger.info(
-            "Enviando consulta al ChatEngine..."
+            "Construyendo prompt..."
+        )
+
+        prompt = self.prompt_builder.build(
+            question=question,
+            context=context,
+        )
+
+        logger.info(
+            "Enviando consulta al LLM..."
         )
 
         response = self.llm.generate(
-            prompt=question,
-            context=context,
+            prompt=prompt,
         )
 
         logger.info(
