@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+import pandas as pd
+
 from llm.base_llm import BaseLLM
 from llm.llm_factory import LLMFactory
 
@@ -78,6 +80,25 @@ class EnterpriseAI:
 
         analysis = self.analysis_engine.analyze_file(
             file_path
+        )
+
+        return self.chat_engine.ask(
+            question=question,
+            context=analysis.ai_context,
+        )
+
+    def ask_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+        question: str,
+    ) -> str:
+        """
+        Analiza un DataFrame en memoria y utiliza
+        el resultado para responder una pregunta.
+        """
+
+        analysis = self.analysis_engine.analyze_dataframe(
+            dataframe
         )
 
         return self.chat_engine.ask(
