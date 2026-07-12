@@ -13,6 +13,7 @@ from typing import Optional
 from llm.base_llm import BaseLLM
 from llm.llm_factory import LLMFactory
 
+from core.chat_engine import ChatEngine
 from core.database import DatabaseManager
 from core.engines.analysis_engine import AnalysisEngine
 
@@ -27,6 +28,7 @@ class EnterpriseAI:
     Componentes:
 
     - AnalysisEngine
+    - ChatEngine
     - DatabaseManager
     - LLM
     """
@@ -38,6 +40,11 @@ class EnterpriseAI:
 
         # Inteligencia Artificial
         self.llm: BaseLLM = LLMFactory.create()
+
+        # Motor de conversación
+        self.chat_engine = ChatEngine(
+            self.llm
+        )
 
         # Motor de análisis
         self.analysis_engine = AnalysisEngine()
@@ -51,11 +58,11 @@ class EnterpriseAI:
         context: Optional[str] = None,
     ) -> str:
         """
-        Envía una consulta al proveedor LLM.
+        Envía una consulta al motor de conversación.
         """
 
-        return self.llm.generate(
-            prompt=question,
+        return self.chat_engine.ask(
+            question=question,
             context=context,
         )
 
@@ -65,15 +72,15 @@ class EnterpriseAI:
         question: str,
     ) -> str:
         """
-        Analiza un archivo y utiliza el contexto
-        generado para responder una pregunta.
+        Analiza un archivo y utiliza el resultado
+        para responder una pregunta.
         """
 
         analysis = self.analysis_engine.analyze_file(
             file_path
         )
 
-        return self.ask(
+        return self.chat_engine.ask(
             question=question,
             context=analysis.ai_context,
         )
