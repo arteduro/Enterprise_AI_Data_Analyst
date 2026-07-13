@@ -98,6 +98,20 @@ class VisualizationEngine:
             chart_type="boxplot",
         )
 
+    def create_correlation(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> dict:
+        """
+        Genera la configuración de una
+        matriz de correlación.
+        """
+
+        return self._build_chart(
+            dataframe=dataframe,
+            chart_type="correlation",
+        )
+
     def _build_chart(
         self,
         dataframe: pd.DataFrame,
@@ -109,7 +123,7 @@ class VisualizationEngine:
         """
 
         logger.info(
-            f"Generando configuración del {chart_type}..."
+            f"Generando configuración de {chart_type}..."
         )
 
         numeric_columns = list(
@@ -130,7 +144,7 @@ class VisualizationEngine:
             }
 
         logger.info(
-            f"Configuración del {chart_type} generada."
+            f"Configuración de {chart_type} generada."
         )
 
         return {

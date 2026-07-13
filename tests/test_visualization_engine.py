@@ -79,6 +79,19 @@ def main() -> None:
     for column in boxplot["columns"]:
         print(f"- {column}")
 
+    correlation = engine.create_correlation(
+        dataframe
+    )
+
+    print("\n===== CORRELATION =====\n")
+
+    print(f"Disponible: {correlation['available']}")
+    print(f"Tipo: {correlation['type']}")
+    print("Columnas:")
+
+    for column in correlation["columns"]:
+        print(f"- {column}")
+
 
 if __name__ == "__main__":
     main()
