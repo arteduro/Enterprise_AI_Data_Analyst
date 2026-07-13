@@ -13,6 +13,21 @@ from core.engines.visualization_engine import (
 )
 
 
+def print_chart(chart: dict, title: str) -> None:
+    """
+    Imprime la configuración de un gráfico.
+    """
+
+    print(f"\n===== {title} =====\n")
+
+    print(f"Disponible: {chart['available']}")
+    print(f"Tipo: {chart['type']}")
+    print("Columnas:")
+
+    for column in chart["columns"]:
+        print(f"- {column}")
+
+
 def main() -> None:
     """
     Ejecuta las pruebas del motor
@@ -44,53 +59,32 @@ def main() -> None:
 
     print("\n===== VISUALIZATION ENGINE =====\n")
 
-    charts = engine.auto_visualize(
-        dataframe
-    )
+    charts = engine.auto_visualize(dataframe)
 
     print("Gráficos recomendados:\n")
 
     for chart in charts:
         print(f"- {chart}")
 
-    histogram = engine.create_histogram(
-        dataframe
+    print_chart(
+        engine.create_histogram(dataframe),
+        "HISTOGRAMA",
     )
 
-    print("\n===== HISTOGRAMA =====\n")
-
-    print(f"Disponible: {histogram['available']}")
-    print(f"Tipo: {histogram['type']}")
-    print("Columnas:")
-
-    for column in histogram["columns"]:
-        print(f"- {column}")
-
-    boxplot = engine.create_boxplot(
-        dataframe
+    print_chart(
+        engine.create_boxplot(dataframe),
+        "BOXPLOT",
     )
 
-    print("\n===== BOXPLOT =====\n")
-
-    print(f"Disponible: {boxplot['available']}")
-    print(f"Tipo: {boxplot['type']}")
-    print("Columnas:")
-
-    for column in boxplot["columns"]:
-        print(f"- {column}")
-
-    correlation = engine.create_correlation(
-        dataframe
+    print_chart(
+        engine.create_correlation(dataframe),
+        "CORRELATION",
     )
 
-    print("\n===== CORRELATION =====\n")
-
-    print(f"Disponible: {correlation['available']}")
-    print(f"Tipo: {correlation['type']}")
-    print("Columnas:")
-
-    for column in correlation["columns"]:
-        print(f"- {column}")
+    print_chart(
+        engine.create_bar_chart(dataframe),
+        "BAR CHART",
+    )
 
 
 if __name__ == "__main__":

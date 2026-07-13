@@ -112,6 +112,46 @@ class VisualizationEngine:
             chart_type="correlation",
         )
 
+    def create_bar_chart(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> dict:
+        """
+        Genera la configuración de un
+        gráfico de barras.
+        """
+
+        logger.info(
+            "Generando configuración de bar..."
+        )
+
+        categorical_columns = list(
+            dataframe.select_dtypes(
+                exclude="number"
+            ).columns
+        )
+
+        if not categorical_columns:
+            logger.warning(
+                "No existen variables categóricas."
+            )
+
+            return {
+                "type": "bar",
+                "available": False,
+                "columns": [],
+            }
+
+        logger.info(
+            "Configuración de bar generada."
+        )
+
+        return {
+            "type": "bar",
+            "available": True,
+            "columns": categorical_columns,
+        }
+
     def _build_chart(
         self,
         dataframe: pd.DataFrame,
@@ -119,7 +159,7 @@ class VisualizationEngine:
     ) -> dict:
         """
         Construye la configuración base
-        para un gráfico.
+        para gráficos numéricos.
         """
 
         logger.info(
@@ -132,7 +172,19 @@ class VisualizationEngine:
             ).columns
         )
 
-        if not numeric_columns:
+        if chart_type == "correlation":
+            if len(numeric_columns) < 2:
+                logger.warning(
+                    "Se requieren al menos dos variables numéricas."
+                )
+
+                return {
+                    "type": chart_type,
+                    "available": False,
+                    "columns": [],
+                }
+
+        elif not numeric_columns:
             logger.warning(
                 "No existen variables numéricas."
             )
