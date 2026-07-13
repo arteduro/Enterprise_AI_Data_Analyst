@@ -14,12 +14,13 @@ import plotly.express as px
 from plotly.graph_objects import Figure
 
 from config.logging_config import get_logger
+from core.engines.base_chart_engine import BaseChartEngine
 from core.models.chart_config import ChartConfig
 
 logger = get_logger(__name__)
 
 
-class PlotlyEngine:
+class PlotlyEngine(BaseChartEngine):
     """
     Motor encargado de generar figuras
     de Plotly a partir de un ChartConfig.
@@ -45,22 +46,24 @@ class PlotlyEngine:
                 "La configuración del gráfico no está disponible."
             )
 
-        if config.type == "histogram":
-            figure = self._create_histogram(
-                dataframe,
-                config,
-            )
+        builders = {
+            "histogram": self._create_histogram,
+            "boxplot": self._create_boxplot,
+            "correlation": self._create_correlation,
+            "bar": self._create_bar_chart,
+        }
 
-        elif config.type == "boxplot":
-            figure = self._create_boxplot(
-                dataframe,
-                config,
-            )
+        builder = builders.get(config.type)
 
-        else:
+        if builder is None:
             raise ValueError(
                 f"Tipo de gráfico no soportado: {config.type}"
             )
+
+        figure = builder(
+            dataframe,
+            config,
+        )
 
         figure.update_layout(
             title=config.title,
@@ -98,4 +101,53 @@ class PlotlyEngine:
         return px.box(
             dataframe,
             y=config.columns[0],
+        )
+
+    def _create_correlation(
+        self,
+        dataframe: pd.DataFrame,
+        config: ChartConfig,
+    ) -> Figure:
+        """
+        Genera una matriz de correlación.
+        """
+
+        correlation = dataframe[
+            config.columns
+        ].corr(
+            numeric_only=True
+        )
+
+        return px.imshow(
+            correlation,
+            text_auto=True,
+            aspect="auto",
+        )
+
+    def _create_bar_chart(
+        self,
+        dataframe: pd.DataFrame,
+        config: ChartConfig,
+    ) -> Figure:
+        """
+        Genera un gráfico de barras.
+        """
+
+        counts = (
+            dataframe[
+                config.columns[0]
+            ]
+            .value_counts()
+            .reset_index()
+        )
+
+        counts.columns = [
+            config.columns[0],
+            "count",
+        ]
+
+        return px.bar(
+            counts,
+            x=config.columns[0],
+            y="count",
         )
