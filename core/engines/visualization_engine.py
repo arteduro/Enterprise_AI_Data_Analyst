@@ -80,36 +80,10 @@ class VisualizationEngine:
         Genera la configuración de un histograma.
         """
 
-        logger.info(
-            "Generando configuración del histograma..."
+        return self._build_chart(
+            dataframe=dataframe,
+            chart_type="histogram",
         )
-
-        numeric_columns = list(
-            dataframe.select_dtypes(
-                include="number"
-            ).columns
-        )
-
-        if not numeric_columns:
-            logger.warning(
-                "No existen variables numéricas."
-            )
-
-            return {
-                "type": "histogram",
-                "available": False,
-                "columns": [],
-            }
-
-        logger.info(
-            "Configuración del histograma generada."
-        )
-
-        return {
-            "type": "histogram",
-            "available": True,
-            "columns": numeric_columns,
-        }
 
     def create_boxplot(
         self,
@@ -119,8 +93,23 @@ class VisualizationEngine:
         Genera la configuración de un boxplot.
         """
 
+        return self._build_chart(
+            dataframe=dataframe,
+            chart_type="boxplot",
+        )
+
+    def _build_chart(
+        self,
+        dataframe: pd.DataFrame,
+        chart_type: str,
+    ) -> dict:
+        """
+        Construye la configuración base
+        para un gráfico.
+        """
+
         logger.info(
-            "Generando configuración del boxplot..."
+            f"Generando configuración del {chart_type}..."
         )
 
         numeric_columns = list(
@@ -135,17 +124,17 @@ class VisualizationEngine:
             )
 
             return {
-                "type": "boxplot",
+                "type": chart_type,
                 "available": False,
                 "columns": [],
             }
 
         logger.info(
-            "Configuración del boxplot generada."
+            f"Configuración del {chart_type} generada."
         )
 
         return {
-            "type": "boxplot",
+            "type": chart_type,
             "available": True,
             "columns": numeric_columns,
         }
