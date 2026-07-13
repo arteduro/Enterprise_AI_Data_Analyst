@@ -15,7 +15,7 @@ from core.engines.visualization_engine import (
 
 def main() -> None:
     """
-    Ejecuta la prueba del motor
+    Ejecuta las pruebas del motor
     de visualización.
     """
 
@@ -42,16 +42,29 @@ def main() -> None:
 
     engine = VisualizationEngine()
 
+    print("\n===== VISUALIZATION ENGINE =====\n")
+
     charts = engine.auto_visualize(
         dataframe
     )
-
-    print("\n===== VISUALIZATION ENGINE =====\n")
 
     print("Gráficos recomendados:\n")
 
     for chart in charts:
         print(f"- {chart}")
+
+    histogram = engine.create_histogram(
+        dataframe
+    )
+
+    print("\n===== HISTOGRAMA =====\n")
+
+    print(f"Disponible: {histogram['available']}")
+    print(f"Tipo: {histogram['type']}")
+    print("Columnas:")
+
+    for column in histogram["columns"]:
+        print(f"- {column}")
 
 
 if __name__ == "__main__":

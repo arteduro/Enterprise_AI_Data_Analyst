@@ -81,3 +81,46 @@ class VisualizationEngine:
         )
 
         return charts
+
+    def create_histogram(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> dict:
+        """
+        Genera la configuración de un histograma.
+
+        En esta primera versión no crea la imagen,
+        únicamente devuelve la información necesaria
+        para construir el gráfico.
+        """
+
+        logger.info(
+            "Generando configuración del histograma..."
+        )
+
+        numeric_columns = list(
+            dataframe.select_dtypes(
+                include="number"
+            ).columns
+        )
+
+        if not numeric_columns:
+            logger.warning(
+                "No existen variables numéricas."
+            )
+
+            return {
+                "type": "histogram",
+                "available": False,
+                "columns": [],
+            }
+
+        logger.info(
+            "Configuración del histograma generada."
+        )
+
+        return {
+            "type": "histogram",
+            "available": True,
+            "columns": numeric_columns,
+        }
