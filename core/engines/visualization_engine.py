@@ -40,16 +40,6 @@ class VisualizationEngine:
         """
         Recomienda visualizaciones para
         un DataFrame.
-
-        Parameters
-        ----------
-        dataframe : pd.DataFrame
-            Dataset a analizar.
-
-        Returns
-        -------
-        list[str]
-            Lista de gráficos recomendados.
         """
 
         logger.info(
@@ -88,10 +78,6 @@ class VisualizationEngine:
     ) -> dict:
         """
         Genera la configuración de un histograma.
-
-        En esta primera versión no crea la imagen,
-        únicamente devuelve la información necesaria
-        para construir el gráfico.
         """
 
         logger.info(
@@ -121,6 +107,45 @@ class VisualizationEngine:
 
         return {
             "type": "histogram",
+            "available": True,
+            "columns": numeric_columns,
+        }
+
+    def create_boxplot(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> dict:
+        """
+        Genera la configuración de un boxplot.
+        """
+
+        logger.info(
+            "Generando configuración del boxplot..."
+        )
+
+        numeric_columns = list(
+            dataframe.select_dtypes(
+                include="number"
+            ).columns
+        )
+
+        if not numeric_columns:
+            logger.warning(
+                "No existen variables numéricas."
+            )
+
+            return {
+                "type": "boxplot",
+                "available": False,
+                "columns": [],
+            }
+
+        logger.info(
+            "Configuración del boxplot generada."
+        )
+
+        return {
+            "type": "boxplot",
             "available": True,
             "columns": numeric_columns,
         }

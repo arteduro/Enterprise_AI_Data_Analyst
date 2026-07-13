@@ -66,6 +66,19 @@ def main() -> None:
     for column in histogram["columns"]:
         print(f"- {column}")
 
+    boxplot = engine.create_boxplot(
+        dataframe
+    )
+
+    print("\n===== BOXPLOT =====\n")
+
+    print(f"Disponible: {boxplot['available']}")
+    print(f"Tipo: {boxplot['type']}")
+    print("Columnas:")
+
+    for column in boxplot["columns"]:
+        print(f"- {column}")
+
 
 if __name__ == "__main__":
     main()
