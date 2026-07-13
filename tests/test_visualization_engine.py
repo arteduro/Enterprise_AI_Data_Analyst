@@ -11,21 +11,33 @@ import pandas as pd
 from core.engines.visualization_engine import (
     VisualizationEngine,
 )
+from core.models.chart_config import ChartConfig
 
 
-def print_chart(chart: dict, title: str) -> None:
+def print_chart(
+    chart: ChartConfig,
+    title: str,
+) -> None:
     """
     Imprime la configuración de un gráfico.
     """
 
     print(f"\n===== {title} =====\n")
 
-    print(f"Disponible: {chart['available']}")
-    print(f"Tipo: {chart['type']}")
+    print(f"Disponible: {chart.available}")
+    print(f"Tipo: {chart.type}")
+    print(f"Título: {chart.title}")
+    print(f"Descripción: {chart.description}")
+    print(f"Motor: {chart.engine}")
+    print(f"Interactivo: {chart.interactive}")
+
     print("Columnas:")
 
-    for column in chart["columns"]:
-        print(f"- {column}")
+    if not chart.columns:
+        print("- Ninguna")
+    else:
+        for column in chart.columns:
+            print(f"- {column}")
 
 
 def main() -> None:
@@ -59,7 +71,9 @@ def main() -> None:
 
     print("\n===== VISUALIZATION ENGINE =====\n")
 
-    charts = engine.auto_visualize(dataframe)
+    charts = engine.auto_visualize(
+        dataframe
+    )
 
     print("Gráficos recomendados:\n")
 

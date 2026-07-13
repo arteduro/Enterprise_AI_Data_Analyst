@@ -14,6 +14,7 @@ from __future__ import annotations
 import pandas as pd
 
 from config.logging_config import get_logger
+from core.models.chart_config import ChartConfig
 
 logger = get_logger(__name__)
 
@@ -75,7 +76,7 @@ class VisualizationEngine:
     def create_histogram(
         self,
         dataframe: pd.DataFrame,
-    ) -> dict:
+    ) -> ChartConfig:
         """
         Genera la configuración de un histograma.
         """
@@ -88,7 +89,7 @@ class VisualizationEngine:
     def create_boxplot(
         self,
         dataframe: pd.DataFrame,
-    ) -> dict:
+    ) -> ChartConfig:
         """
         Genera la configuración de un boxplot.
         """
@@ -101,7 +102,7 @@ class VisualizationEngine:
     def create_correlation(
         self,
         dataframe: pd.DataFrame,
-    ) -> dict:
+    ) -> ChartConfig:
         """
         Genera la configuración de una
         matriz de correlación.
@@ -115,7 +116,7 @@ class VisualizationEngine:
     def create_bar_chart(
         self,
         dataframe: pd.DataFrame,
-    ) -> dict:
+    ) -> ChartConfig:
         """
         Genera la configuración de un
         gráfico de barras.
@@ -136,27 +137,30 @@ class VisualizationEngine:
                 "No existen variables categóricas."
             )
 
-            return {
-                "type": "bar",
-                "available": False,
-                "columns": [],
-            }
+            return ChartConfig(
+                type="bar",
+                available=False,
+            )
 
         logger.info(
             "Configuración de bar generada."
         )
 
-        return {
-            "type": "bar",
-            "available": True,
-            "columns": categorical_columns,
-        }
+        return ChartConfig(
+            type="bar",
+            available=True,
+            columns=categorical_columns,
+            title="Gráfico de barras",
+            description=(
+                "Comparación entre variables categóricas."
+            ),
+        )
 
     def _build_chart(
         self,
         dataframe: pd.DataFrame,
         chart_type: str,
-    ) -> dict:
+    ) -> ChartConfig:
         """
         Construye la configuración base
         para gráficos numéricos.
@@ -178,29 +182,47 @@ class VisualizationEngine:
                     "Se requieren al menos dos variables numéricas."
                 )
 
-                return {
-                    "type": chart_type,
-                    "available": False,
-                    "columns": [],
-                }
+                return ChartConfig(
+                    type=chart_type,
+                    available=False,
+                )
 
         elif not numeric_columns:
             logger.warning(
                 "No existen variables numéricas."
             )
 
-            return {
-                "type": chart_type,
-                "available": False,
-                "columns": [],
-            }
+            return ChartConfig(
+                type=chart_type,
+                available=False,
+            )
 
         logger.info(
             f"Configuración de {chart_type} generada."
         )
 
-        return {
-            "type": chart_type,
-            "available": True,
-            "columns": numeric_columns,
+        titles = {
+            "histogram": "Histograma",
+            "boxplot": "Boxplot",
+            "correlation": "Matriz de correlación",
         }
+
+        descriptions = {
+            "histogram": (
+                "Distribución de variables numéricas."
+            ),
+            "boxplot": (
+                "Detección de dispersión y valores atípicos."
+            ),
+            "correlation": (
+                "Relación entre variables numéricas."
+            ),
+        }
+
+        return ChartConfig(
+            type=chart_type,
+            available=True,
+            columns=numeric_columns,
+            title=titles.get(chart_type, ""),
+            description=descriptions.get(chart_type, ""),
+        )
