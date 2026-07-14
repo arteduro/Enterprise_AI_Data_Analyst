@@ -65,3 +65,5 @@ htmlcov/
 
 # Streamlit
 .streamlit/secrets.toml
+# Dashboards generados automáticamente
+dashboard.html
