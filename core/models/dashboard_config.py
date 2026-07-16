@@ -12,11 +12,13 @@ from dataclasses import dataclass, field
 
 from plotly.graph_objects import Figure
 
+from core.models.ai_report import AIReport
+
 
 @dataclass(slots=True)
 class DashboardConfig:
     """
-    Configuración de un dashboard.
+    Configuración del Dashboard Enterprise.
     """
 
     title: str
@@ -26,6 +28,8 @@ class DashboardConfig:
     figures: list[Figure] = field(
         default_factory=list
     )
+
+    report: AIReport | None = None
 
     theme: str = "plotly"
 

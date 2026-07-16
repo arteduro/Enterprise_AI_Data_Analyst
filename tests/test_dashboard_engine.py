@@ -70,13 +70,45 @@ def main() -> None:
         figures=figures,
     )
 
+    report = """
+# Resumen Ejecutivo
+
+El dataset presenta una excelente calidad de datos.
+
+No existen valores nulos ni registros duplicados.
+
+# Hallazgos Importantes
+
+- Se detectan correlaciones muy altas entre las variables numéricas.
+- El conjunto de datos contiene 5 registros.
+- Se identifican tres variables numéricas y una categórica.
+
+# Riesgos Detectados
+
+- La muestra es pequeña.
+- Las correlaciones deben validarse con un mayor volumen de datos.
+
+# Recomendaciones
+
+- Incrementar la cantidad de registros.
+- Incorporar nuevas variables de negocio.
+- Validar el comportamiento sobre datos reales.
+
+# Próximos Pasos
+
+- Leer un archivo Excel.
+- Generar automáticamente el informe con Gemini.
+- Mostrar el informe dentro del Dashboard Enterprise.
+"""
+
     output_path = "dashboard.html"
 
     engine = DashboardEngine()
 
     result = engine.save_html(
-        dashboard,
-        output_path,
+        dashboard=dashboard,
+        output_path=output_path,
+        report=report,
     )
 
     print("\n===== DASHBOARD ENGINE =====\n")

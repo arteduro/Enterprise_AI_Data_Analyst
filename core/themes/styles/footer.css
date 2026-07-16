@@ -1,0 +1,63 @@
+/* =======================================================
+   Footer Enterprise
+======================================================= */
+
+footer{
+
+    margin-top:45px;
+
+    padding:25px;
+
+    border-top:1px solid var(--border);
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    color:var(--text-light);
+
+    font-size:14px;
+
+}
+
+/* ========================================= */
+
+.footer-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+/* ========================================= */
+
+.footer-right{
+
+    display:flex;
+
+    gap:20px;
+
+}
+
+/* ========================================= */
+
+.footer-right span{
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    padding:8px 15px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}

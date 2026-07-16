@@ -1,0 +1,173 @@
+/* =======================================================
+   Sidebar
+======================================================= */
+
+.sidebar{
+
+    background:linear-gradient(
+        180deg,
+        #0f172a,
+        #1e293b
+    );
+
+    color:white;
+
+    min-height:100vh;
+
+    padding:30px 22px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    position:sticky;
+
+    top:0;
+
+    box-shadow:
+        8px 0 25px rgba(0,0,0,.15);
+
+}
+
+/* ========================================= */
+
+.sidebar-logo{
+
+    width:85px;
+
+    height:85px;
+
+    margin:0 auto 25px;
+
+    border-radius:22px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:42px;
+
+    box-shadow:
+        0 15px 35px rgba(37,99,235,.45);
+
+}
+
+/* ========================================= */
+
+.sidebar h2{
+
+    text-align:center;
+
+    font-size:24px;
+
+    font-weight:700;
+
+}
+
+.sidebar p{
+
+    margin-top:8px;
+
+    text-align:center;
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+    margin-bottom:35px;
+
+}
+
+/* ========================================= */
+
+.sidebar-menu{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+/* ========================================= */
+
+.sidebar-menu a{
+
+    padding:14px 18px;
+
+    border-radius:12px;
+
+    color:#e2e8f0;
+
+    font-size:15px;
+
+    transition:.25s;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+/* ========================================= */
+
+.sidebar-menu a:hover{
+
+    background:rgba(255,255,255,.10);
+
+    color:white;
+
+    transform:translateX(8px);
+
+}
+
+/* ========================================= */
+
+.sidebar-footer{
+
+    margin-top:40px;
+
+    padding-top:25px;
+
+    border-top:1px solid rgba(255,255,255,.12);
+
+    text-align:center;
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+}
+
+/* ========================================= */
+
+.online{
+
+    margin-top:15px;
+
+    background:#16a34a;
+
+    color:white;
+
+    padding:10px;
+
+    border-radius:25px;
+
+    font-weight:700;
+
+    display:inline-block;
+
+}

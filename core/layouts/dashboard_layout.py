@@ -8,18 +8,23 @@ Autor: Edgar Arteaga
 
 from __future__ import annotations
 
+from core.components.ai_report_card import AIReportCard
+from core.components.dashboard_header import DashboardHeader
+from core.components.dashboard_kpis import DashboardKPIs
+from core.components.dashboard_sidebar import DashboardSidebar
 from core.models.dashboard_config import DashboardConfig
 from core.themes.dashboard_theme import DashboardTheme
 
 
 class DashboardLayout:
     """
-    Construye el HTML completo del dashboard.
+    Construye el HTML completo del Dashboard Enterprise.
     """
 
     @staticmethod
     def build(
         dashboard: DashboardConfig,
+        report: str = "",
     ) -> str:
 
         css = DashboardTheme.css()
@@ -60,6 +65,11 @@ class DashboardLayout:
 
 <meta charset="utf-8">
 
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <title>{dashboard.title}</title>
 
 <style>
@@ -72,43 +82,31 @@ class DashboardLayout:
 
 <body>
 
-<div class="container">
+<div class="app-layout">
 
-<header class="dashboard-header">
+    {DashboardSidebar.render()}
 
-<div class="header-info">
+    <main class="main-content">
 
-<h1>🤖 Enterprise AI Data Analyst</h1>
+        {DashboardHeader.render(dashboard)}
 
-<p>{dashboard.description}</p>
+        {DashboardKPIs.render(dashboard)}
 
-</div>
+        <section class="dashboard-grid">
 
-<div class="header-status">
+            {figures_html}
 
-<div>📊 {len(dashboard.figures)} gráficos</div>
+        </section>
 
-<div>🧠 IA Ready</div>
+        {AIReportCard.render(report)}
 
-<div>📅 2026</div>
+        <footer>
 
-<div class="online">🟢 ONLINE</div>
+            Enterprise AI Data Analyst © 2026
 
-</div>
+        </footer>
 
-</header>
-
-<section class="dashboard-grid">
-
-{figures_html}
-
-</section>
-
-<footer>
-
-Enterprise AI Data Analyst © 2026
-
-</footer>
+    </main>
 
 </div>
 

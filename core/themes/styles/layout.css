@@ -1,0 +1,85 @@
+/* =======================================================
+   Layout
+======================================================= */
+
+.app-layout{
+
+    display:grid;
+
+    grid-template-columns:280px 1fr;
+
+    min-height:100vh;
+
+}
+
+/* ===========================
+   Main Content
+=========================== */
+
+.main-content{
+
+    padding:35px;
+
+    overflow-x:auto;
+
+}
+
+/* ===========================
+   Containers
+=========================== */
+
+.content-section{
+
+    margin-bottom:30px;
+
+}
+
+/* ===========================
+   Dashboard Grid
+=========================== */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(700px,1fr)
+        );
+
+    gap:30px;
+
+    margin-top:30px;
+
+}
+
+/* ===========================
+   Utilities
+=========================== */
+
+.full-width{
+
+    grid-column:1/-1;
+
+}
+
+.center{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.space-between{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
