@@ -8,6 +8,8 @@ Autor: Edgar Arteaga
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from core.components.ai_report_card import AIReportCard
 from core.components.dashboard_header import DashboardHeader
 from core.components.dashboard_kpis import DashboardKPIs
@@ -25,6 +27,7 @@ class DashboardLayout:
     def build(
         dashboard: DashboardConfig,
         report: str = "",
+        output_file: str = "dashboard.html",
     ) -> str:
 
         css = DashboardTheme.css()
@@ -56,7 +59,7 @@ class DashboardLayout:
 
         figures_html = "\n".join(cards)
 
-        return f"""
+        html = f"""
 <!DOCTYPE html>
 
 <html lang="es">
@@ -114,3 +117,12 @@ class DashboardLayout:
 
 </html>
 """.strip()
+
+        output_path = Path(output_file)
+
+        output_path.write_text(
+            html,
+            encoding="utf-8",
+        )
+
+        return str(output_path.resolve())

@@ -20,6 +20,7 @@ from core.document_loader import DocumentLoader
 from core.engines.plotly_engine import PlotlyEngine
 from core.engines.visualization_engine import VisualizationEngine
 from core.layouts.dashboard_layout import DashboardLayout
+from core.models.analysis_result import AnalysisResult
 from core.models.dashboard_config import DashboardConfig
 
 
@@ -28,7 +29,7 @@ class EnterpriseEngine:
     Orquestador principal del sistema.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.loader = DocumentLoader()
 
@@ -45,17 +46,31 @@ class EnterpriseEngine:
         file_path: str | Path,
     ) -> str:
         """
-        Analiza directamente un archivo.
+        Analiza un archivo y genera el dashboard HTML.
         """
 
         dataframe = self.loader.load(file_path)
 
-        return self.analyze_dataframe(dataframe)
+        result = self.analyze_dataframe(dataframe)
+
+        html = DashboardLayout.build(
+            result.dashboard,
+            result.report,
+        )
+
+        output = Path("dashboard.html")
+
+        output.write_text(
+            html,
+            encoding="utf-8",
+        )
+
+        return str(output.resolve())
 
     def analyze_dataframe(
         self,
         dataframe: pd.DataFrame,
-    ) -> str:
+    ) -> AnalysisResult:
         """
         Analiza un DataFrame completo.
         """
@@ -96,13 +111,8 @@ class EnterpriseEngine:
             report=report.report,
         )
 
-        html = DashboardLayout.build(dashboard)
-
-        output = Path("dashboard.html")
-
-        output.write_text(
-            html,
-            encoding="utf-8",
+        return AnalysisResult(
+            dataframe=dataframe,
+            dashboard=dashboard,
+            report=report.report,
         )
-
-        return str(output.resolve())
