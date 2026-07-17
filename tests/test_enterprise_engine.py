@@ -3,13 +3,15 @@ tests/test_enterprise_engine.py
 
 Prueba completa del EnterpriseEngine.
 
+Carga automáticamente el primer dataset encontrado
+en la carpeta datasets.
+
 Autor: Edgar Arteaga
 """
 
 from pathlib import Path
 
-import pandas as pd
-
+from core.document_loader import DocumentLoader
 from core.engines.enterprise_engine import EnterpriseEngine
 
 
@@ -18,32 +20,35 @@ def main() -> None:
     Ejecuta el flujo completo.
     """
 
-    dataframe = pd.DataFrame(
-        {
-            "edad": [20, 25, 30, 40, 35],
-            "salario": [1500, 2000, 3000, 5000, 4500],
-            "ventas": [10, 15, 20, 30, 28],
-            "ciudad": [
-                "Cúcuta",
-                "Bogotá",
-                "Medellín",
-                "Cali",
-                "Cúcuta",
-            ],
-        }
-    )
+    loader = DocumentLoader()
+
+    dataset = loader.find_first_dataset()
+
+    dataframe = loader.load(dataset)
 
     engine = EnterpriseEngine()
 
     output = engine.analyze_dataframe(dataframe)
 
-    print("\n===== ENTERPRISE ENGINE =====\n")
+    print("\n" + "=" * 80)
+    print("ENTERPRISE AI DATA ANALYST")
+    print("=" * 80)
 
-    print(f"Dashboard generado: {output}")
+    print(f"\nDataset utilizado : {dataset.name}")
 
-    print(f"Existe: {Path(output).exists()}")
+    print(f"Ruta             : {dataset}")
 
-    print("\nEnterprise Engine ejecutado correctamente.")
+    print(f"Filas            : {len(dataframe):,}")
+
+    print(f"Columnas         : {len(dataframe.columns)}")
+
+    print()
+
+    print(f"Dashboard        : {output}")
+
+    print(f"Existe           : {Path(output).exists()}")
+
+    print("\nPipeline ejecutado correctamente.")
 
 
 if __name__ == "__main__":

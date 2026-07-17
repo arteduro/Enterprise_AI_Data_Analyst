@@ -10,13 +10,16 @@ Autor: Edgar Arteaga
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
-from core.data_processor import DataProcessor
 from core.ai.ai_report_engine import AIReportEngine
-from core.engines.visualization_engine import VisualizationEngine
+from core.data_processor import DataProcessor
+from core.document_loader import DocumentLoader
 from core.engines.plotly_engine import PlotlyEngine
-from core.engines.dashboard_engine import DashboardEngine
+from core.engines.visualization_engine import VisualizationEngine
+from core.layouts.dashboard_layout import DashboardLayout
 from core.models.dashboard_config import DashboardConfig
 
 
@@ -27,6 +30,8 @@ class EnterpriseEngine:
 
     def __init__(self):
 
+        self.loader = DocumentLoader()
+
         self.processor = DataProcessor()
 
         self.ai = AIReportEngine()
@@ -35,66 +40,69 @@ class EnterpriseEngine:
 
         self.plotly = PlotlyEngine()
 
-        self.dashboard = DashboardEngine()
+    def analyze_file(
+        self,
+        file_path: str | Path,
+    ) -> str:
+        """
+        Analiza directamente un archivo.
+        """
+
+        dataframe = self.loader.load(file_path)
+
+        return self.analyze_dataframe(dataframe)
 
     def analyze_dataframe(
         self,
         dataframe: pd.DataFrame,
-        output_path: str = "dashboard.html",
     ) -> str:
         """
-        Ejecuta el flujo completo de Enterprise AI Data Analyst.
+        Analiza un DataFrame completo.
         """
-
-        # ======================================================
-        # 1. Analizar Dataset
-        # ======================================================
 
         analysis = self.processor.profile(dataframe)
 
-        # ======================================================
-        # 2. Generar Reporte IA
-        # ======================================================
-
         report = self.ai.generate_report(
-            analysis.ai_context
+            analysis.ai_context,
         )
 
-        # ======================================================
-        # 3. Crear Visualizaciones
-        # ======================================================
-
         figures = [
+
             self.plotly.create_figure(
                 dataframe,
                 self.visualization.create_histogram(dataframe),
             ),
+
             self.plotly.create_figure(
                 dataframe,
                 self.visualization.create_boxplot(dataframe),
             ),
+
             self.plotly.create_figure(
                 dataframe,
                 self.visualization.create_correlation(dataframe),
             ),
+
             self.plotly.create_figure(
                 dataframe,
                 self.visualization.create_bar_chart(dataframe),
             ),
         ]
 
-        # ======================================================
-        # 4. Construir Dashboard
-        # ======================================================
-
         dashboard = DashboardConfig(
             title="Enterprise AI Data Analyst",
-            description="Dashboard generado automáticamente.",
+            description="Dashboard generado automáticamente",
             figures=figures,
-            report=report,
+            report=report.report,
         )
 
-        return self.dashboard.save_html(
-            dashboard,
-            output_path,
+        html = DashboardLayout.build(dashboard)
+
+        output = Path("dashboard.html")
+
+        output.write_text(
+            html,
+            encoding="utf-8",
         )
+
+        return str(output.resolve())

@@ -1,8 +1,7 @@
 """
 core/document_loader.py
 
-Módulo encargado de cargar documentos y datasets
-para Enterprise AI Data Analyst.
+Módulo encargado de cargar documentos y datasets.
 
 Autor: Edgar Arteaga
 """
@@ -15,7 +14,7 @@ import pandas as pd
 from config.logging_config import get_logger
 from core.exceptions import (
     DatasetNotFoundError,
-    InvalidDatasetFormatError
+    InvalidDatasetFormatError,
 )
 
 logger = get_logger(__name__)
@@ -24,20 +23,6 @@ logger = get_logger(__name__)
 class DocumentLoader:
     """
     Cargador universal de documentos.
-
-    Soporta:
-
-    - CSV
-    - Excel (.xlsx, .xls)
-    - JSON
-    - TXT
-    - Parquet
-
-    En futuras versiones:
-
-    - PDF
-    - DOCX
-    - HTML
     """
 
     SUPPORTED_FORMATS = {
@@ -49,16 +34,62 @@ class DocumentLoader:
         ".parquet",
     }
 
-    def load(self, file_path: Union[str, Path]):
+    # -----------------------------------------------------
+    # Buscar automáticamente un dataset
+    # -----------------------------------------------------
+
+    def find_first_dataset(
+        self,
+        folder: Union[str, Path] = "datasets",
+    ) -> Path:
         """
-        Carga un archivo y devuelve su contenido.
+        Busca automáticamente el primer dataset
+        compatible dentro de la carpeta datasets.
         """
+
+        folder = Path(folder)
+
+        if not folder.exists():
+
+            raise DatasetNotFoundError(
+                f"No existe la carpeta {folder}"
+            )
+
+        for extension in (
+            "*.xlsx",
+            "*.xls",
+            "*.csv",
+            "*.parquet",
+            "*.json",
+        ):
+
+            files = sorted(folder.glob(extension))
+
+            if files:
+
+                logger.info(
+                    f"Dataset encontrado: {files[0].name}"
+                )
+
+                return files[0]
+
+        raise DatasetNotFoundError(
+            "No se encontró ningún dataset."
+        )
+
+    # -----------------------------------------------------
+
+    def load(
+        self,
+        file_path: Union[str, Path],
+    ):
 
         path = Path(file_path)
 
         logger.info(f"Cargando archivo: {path}")
 
         if not path.exists():
+
             raise DatasetNotFoundError(
                 f"No existe el archivo: {path}"
             )
@@ -66,6 +97,7 @@ class DocumentLoader:
         suffix = path.suffix.lower()
 
         if suffix not in self.SUPPORTED_FORMATS:
+
             raise InvalidDatasetFormatError(
                 f"Formato no soportado: {suffix}"
             )
@@ -73,7 +105,7 @@ class DocumentLoader:
         if suffix == ".csv":
             return pd.read_csv(path)
 
-        if suffix in [".xlsx", ".xls"]:
+        if suffix in (".xlsx", ".xls"):
             return pd.read_excel(path)
 
         if suffix == ".json":

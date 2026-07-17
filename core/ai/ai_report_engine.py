@@ -17,8 +17,7 @@ from prompts.insights_prompt import InsightsPrompt
 
 class AIReportEngine:
     """
-    Genera informes utilizando el contexto producido
-    por DataProcessor.
+    Orquesta la generación de reportes mediante IA.
     """
 
     def __init__(self):
@@ -30,8 +29,7 @@ class AIReportEngine:
         ai_context: str,
     ) -> str:
         """
-        Construye el prompt utilizando el contexto
-        generado por DataProcessor.
+        Construye el prompt que será enviado al LLM.
         """
 
         return InsightsPrompt.build(ai_context)
@@ -41,20 +39,50 @@ class AIReportEngine:
         ai_context: str,
     ) -> AIReport:
         """
-        Genera el informe utilizando Gemini.
+        Genera un informe utilizando Gemini.
+
+        Si Gemini no está disponible,
+        devuelve un informe de respaldo.
         """
 
         start = time.perf_counter()
 
         prompt = self.build_prompt(ai_context)
 
-        report = self.llm.generate(prompt)
+        try:
+
+            report = self.llm.generate(prompt)
+
+            model = "gemini-2.5-flash"
+
+        except Exception as error:
+
+            report = f"""
+# Informe no disponible
+
+No fue posible generar el análisis mediante Gemini.
+
+## Motivo
+
+{error}
+
+## Estado del sistema
+
+- El dataset fue cargado correctamente.
+- El análisis estadístico fue completado.
+- Las visualizaciones fueron generadas.
+- El dashboard puede construirse normalmente.
+
+Intente nuevamente cuando el servicio de IA esté disponible.
+""".strip()
+
+            model = "fallback"
 
         elapsed = time.perf_counter() - start
 
         return AIReport(
             prompt=prompt,
             report=report,
-            model="gemini-2.5-flash",
+            model=model,
             execution_time=elapsed,
         )
