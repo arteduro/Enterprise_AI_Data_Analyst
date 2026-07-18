@@ -11,7 +11,7 @@ from __future__ import annotations
 import time
 
 from core.models.ai_report import AIReport
-from llm.gemini_client import GeminiClient
+from llm.llm_factory import LLMFactory
 from prompts.insights_prompt import InsightsPrompt
 
 
@@ -21,8 +21,9 @@ class AIReportEngine:
     """
 
     def __init__(self):
-
-        self.llm = GeminiClient()
+        # Obtiene automáticamente el proveedor configurado
+        # (Gemini, Mock, etc.)
+        self.llm = LLMFactory.create()
 
     def build_prompt(
         self,
@@ -39,9 +40,9 @@ class AIReportEngine:
         ai_context: str,
     ) -> AIReport:
         """
-        Genera un informe utilizando Gemini.
+        Genera un informe utilizando el proveedor LLM configurado.
 
-        Si Gemini no está disponible,
+        Si el proveedor falla,
         devuelve un informe de respaldo.
         """
 
@@ -53,14 +54,14 @@ class AIReportEngine:
 
             report = self.llm.generate(prompt)
 
-            model = "gemini-2.5-flash"
+            model = self.llm.__class__.__name__
 
         except Exception as error:
 
             report = f"""
 # Informe no disponible
 
-No fue posible generar el análisis mediante Gemini.
+No fue posible generar el análisis mediante el proveedor de IA.
 
 ## Motivo
 

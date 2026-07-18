@@ -3,9 +3,6 @@ core/application/application_service.py
 
 Capa de aplicación de Enterprise AI Data Analyst.
 
-Expone un punto único de entrada para cualquier
-interfaz (CLI, Streamlit, FastAPI, Desktop, etc.).
-
 Autor: Edgar Arteaga
 """
 
@@ -14,27 +11,36 @@ from __future__ import annotations
 from pathlib import Path
 
 from core.engines.enterprise_engine import EnterpriseEngine
+from core.models.analysis_result import AnalysisResult
 
 
 class ApplicationService:
     """
     Servicio principal de la aplicación.
-
-    Las interfaces nunca deberían comunicarse
-    directamente con EnterpriseEngine.
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
 
         self.engine = EnterpriseEngine()
 
     def analyze(
         self,
         file_path: str | Path,
+    ) -> AnalysisResult:
+        """
+        Devuelve el resultado completo del análisis.
+        """
+
+        dataframe = self.engine.loader.load(file_path)
+
+        return self.engine.analyze_dataframe(dataframe)
+
+    def generate_dashboard_html(
+        self,
+        file_path: str | Path,
     ) -> str:
         """
-        Analiza un archivo y devuelve la ruta
-        del dashboard generado.
+        Compatibilidad con la versión CLI.
         """
 
         return self.engine.analyze_file(file_path)

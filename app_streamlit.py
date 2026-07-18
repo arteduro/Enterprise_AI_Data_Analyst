@@ -1,18 +1,13 @@
 """
 app_streamlit.py
 
-Interfaz principal Streamlit.
-
-Enterprise AI Data Analyst
+Interfaz principal de Enterprise AI Data Analyst.
 
 Autor: Edgar Arteaga
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pandas as pd
 import streamlit as st
 
 from core.application.application_service import ApplicationService
@@ -25,12 +20,36 @@ from ui.charts import Charts
 from ui.report import Report
 
 
+# ==========================================================
+# CACHE DEL ANALISIS COMPLETO
+# ==========================================================
+
+@st.cache_data(show_spinner=False)
+def cached_analysis(dataset_path: str):
+    """
+    Ejecuta el análisis completo una sola vez
+    para un mismo dataset.
+    """
+
+    app = ApplicationService()
+
+    return app.analyze(dataset_path)
+
+
+# ==========================================================
+# CONFIGURACION STREAMLIT
+# ==========================================================
+
 st.set_page_config(
     page_title="Enterprise AI Data Analyst",
     page_icon="🤖",
     layout="wide",
 )
 
+
+# ==========================================================
+# INTERFAZ PRINCIPAL
+# ==========================================================
 
 def main():
 
@@ -54,46 +73,148 @@ def main():
 
     Sidebar.render(dataset)
 
-    if st.button(
+    st.sidebar.divider()
+
+    analizar = st.sidebar.button(
         "🚀 Analizar Dataset",
-        use_container_width=True,
-    ):
+        width="stretch",
+    )
 
-        with st.spinner("Analizando información..."):
+    if not analizar:
+        return
 
-            app = ApplicationService()
+    with st.spinner("Analizando dataset..."):
 
-            dashboard = app.engine.analyze_file(dataset)
+        result = cached_analysis(str(dataset))
 
-            dataframe = pd.read_excel(dataset)
+    # =====================================================
+    # KPIs
+    # =====================================================
 
-        Metrics.render(
-            rows=len(dataframe),
-            columns=len(dataframe.columns),
-            numeric_columns=len(
-                dataframe.select_dtypes("number").columns
-            ),
-            missing_values=int(
-                dataframe.isna().sum().sum()
-            ),
+    Metrics.render(
+        rows=len(result.dataframe),
+        columns=len(result.dataframe.columns),
+        numeric_columns=len(
+            result.dataframe.select_dtypes("number").columns
+        ),
+        missing_values=int(
+            result.dataframe.isna().sum().sum()
+        ),
+    )
+
+    st.divider()
+
+    # =====================================================
+    # TABS PRINCIPALES
+    # =====================================================
+
+    tab1, tab2, tab3, tab4 = st.tabs(
+        [
+            "📊 Resumen",
+            "📈 Visualizaciones",
+            "🤖 Informe IA",
+            "📋 Datos",
+        ]
+    )
+
+    # =====================================================
+    # RESUMEN
+    # =====================================================
+
+    with tab1:
+
+        st.subheader("Resumen del Dataset")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.metric(
+                "Filas",
+                f"{len(result.dataframe):,}"
+            )
+
+            st.metric(
+                "Columnas",
+                len(result.dataframe.columns)
+            )
+
+        with col2:
+
+            memoria = (
+                result.dataframe.memory_usage(
+                    deep=True
+                ).sum()
+                / 1024
+                / 1024
+            )
+
+            st.metric(
+                "Memoria",
+                f"{memoria:.2f} MB"
+            )
+
+            st.metric(
+                "Valores nulos",
+                int(
+                    result.dataframe
+                    .isna()
+                    .sum()
+                    .sum()
+                )
+            )
+
+        st.info(
+            "Seleccione la pestaña "
+            "**Visualizaciones** "
+            "para explorar los gráficos."
         )
 
-        st.subheader("Vista previa")
+    # =====================================================
+    # VISUALIZACIONES
+    # =====================================================
 
-        st.dataframe(
-            dataframe.head(20),
-            use_container_width=True,
+    with tab2:
+
+        st.subheader("Visualizaciones")
+
+        Charts.render(
+            result.dashboard.figures
         )
 
-        st.divider()
+    # =====================================================
+    # INFORME IA
+    # =====================================================
 
-        Charts.render(dashboard.figures)
+    with tab3:
+
+        st.subheader(
+            "Reporte Ejecutivo"
+        )
 
         Report.render(
-            dashboard.report,
+            result.report
         )
 
-        st.success("Proceso finalizado correctamente.")
+    # =====================================================
+    # DATOS
+    # =====================================================
+
+    with tab4:
+
+        st.subheader(
+            "Vista previa del Dataset"
+        )
+
+        st.dataframe(
+            result.dataframe,
+            width="stretch",
+            height=650,
+        )
+
+    st.success(
+        "Análisis completado correctamente."
+    )
 
 
 if __name__ == "__main__":

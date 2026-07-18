@@ -1,7 +1,7 @@
 """
 ui/charts.py
 
-Renderizado de gráficas Plotly.
+Renderizado profesional de gráficas Plotly.
 
 Autor: Edgar Arteaga
 """
@@ -13,9 +13,16 @@ import streamlit as st
 
 class Charts:
     """
-    Renderiza todas las figuras Plotly
-    generadas por EnterpriseEngine.
+    Renderiza las figuras Plotly utilizando
+    pestañas para mejorar el rendimiento.
     """
+
+    TITULOS = [
+        "📊 Histograma",
+        "📦 Boxplot",
+        "🔥 Correlación",
+        "📈 Barras",
+    ]
 
     @staticmethod
     def render(figures: list) -> None:
@@ -30,11 +37,16 @@ class Charts:
 
             return
 
-        for figure in figures:
+        tabs = st.tabs(Charts.TITULOS)
 
-            st.plotly_chart(
-                figure,
-                use_container_width=True,
-            )
+        for tab, figure in zip(tabs, figures):
+
+            with tab:
+
+                st.plotly_chart(
+                    figure,
+                    width="stretch",
+                    key=f"chart_{id(figure)}",
+                )
 
         st.divider()

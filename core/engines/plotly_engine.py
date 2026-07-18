@@ -4,13 +4,16 @@ core/engines/plotly_engine.py
 Motor de generación de gráficos con Plotly para
 Enterprise AI Data Analyst.
 
+Versión optimizada para alto rendimiento.
+
 Autor: Edgar Arteaga
 """
 
 from __future__ import annotations
 
 import pandas as pd
-import plotly.express as px
+
+import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 
 from config.logging_config import get_logger
@@ -23,7 +26,7 @@ logger = get_logger(__name__)
 class PlotlyEngine(BaseChartEngine):
     """
     Motor encargado de generar figuras
-    de Plotly a partir de un ChartConfig.
+    Plotly optimizadas.
     """
 
     def create_figure(
@@ -31,10 +34,6 @@ class PlotlyEngine(BaseChartEngine):
         dataframe: pd.DataFrame,
         config: ChartConfig,
     ) -> Figure:
-        """
-        Genera una figura de Plotly según
-        la configuración recibida.
-        """
 
         logger.info(
             "Generando figura Plotly (%s)...",
@@ -67,6 +66,14 @@ class PlotlyEngine(BaseChartEngine):
 
         figure.update_layout(
             title=config.title,
+            template="plotly_white",
+            height=500,
+            margin=dict(
+                l=30,
+                r=30,
+                t=60,
+                b=30,
+            ),
         )
 
         logger.info(
@@ -75,79 +82,133 @@ class PlotlyEngine(BaseChartEngine):
 
         return figure
 
+    # ==========================================================
+    # HISTOGRAMA
+    # ==========================================================
+
     def _create_histogram(
         self,
         dataframe: pd.DataFrame,
         config: ChartConfig,
     ) -> Figure:
-        """
-        Genera un histograma.
-        """
 
-        return px.histogram(
-            dataframe,
-            x=config.columns[0],
+        columna = config.columns[0]
+
+        fig = go.Figure()
+
+        fig.add_trace(
+            go.Histogram(
+                x=dataframe[columna],
+                nbinsx=30,
+            )
         )
+
+        fig.update_xaxes(title=columna)
+
+        fig.update_yaxes(title="Frecuencia")
+
+        return fig
+
+    # ==========================================================
+    # BOXPLOT
+    # ==========================================================
 
     def _create_boxplot(
         self,
         dataframe: pd.DataFrame,
         config: ChartConfig,
     ) -> Figure:
-        """
-        Genera un boxplot.
-        """
 
-        return px.box(
-            dataframe,
-            y=config.columns[0],
+        columna = config.columns[0]
+
+        fig = go.Figure()
+
+        fig.add_trace(
+
+            go.Box(
+                y=dataframe[columna],
+                name=columna,
+                boxpoints=False,
+            )
+
         )
+
+        fig.update_yaxes(title=columna)
+
+        return fig
+
+    # ==========================================================
+    # CORRELACION
+    # ==========================================================
 
     def _create_correlation(
         self,
         dataframe: pd.DataFrame,
         config: ChartConfig,
     ) -> Figure:
-        """
-        Genera una matriz de correlación.
-        """
 
-        correlation = dataframe[
+        corr = dataframe[
             config.columns
         ].corr(
             numeric_only=True
         )
 
-        return px.imshow(
-            correlation,
-            text_auto=True,
-            aspect="auto",
+        fig = go.Figure(
+
+            data=go.Heatmap(
+
+                z=corr.values,
+
+                x=corr.columns,
+
+                y=corr.columns,
+
+                text=corr.round(2).values,
+
+                texttemplate="%{text}",
+
+                colorscale="Viridis",
+
+            )
+
         )
+
+        return fig
+
+    # ==========================================================
+    # BARRAS
+    # ==========================================================
 
     def _create_bar_chart(
         self,
         dataframe: pd.DataFrame,
         config: ChartConfig,
     ) -> Figure:
-        """
-        Genera un gráfico de barras.
-        """
+
+        columna = config.columns[0]
 
         counts = (
-            dataframe[
-                config.columns[0]
-            ]
+            dataframe[columna]
             .value_counts()
-            .reset_index()
+            .head(20)
         )
 
-        counts.columns = [
-            config.columns[0],
-            "count",
-        ]
+        fig = go.Figure()
 
-        return px.bar(
-            counts,
-            x=config.columns[0],
-            y="count",
+        fig.add_trace(
+
+            go.Bar(
+
+                x=counts.index,
+
+                y=counts.values,
+
+            )
+
         )
+
+        fig.update_xaxes(title=columna)
+
+        fig.update_yaxes(title="Cantidad")
+
+        return fig

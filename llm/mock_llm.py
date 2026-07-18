@@ -16,40 +16,47 @@ from llm.base_llm import BaseLLM
 class MockLLM(BaseLLM):
     """
     Simula un proveedor LLM.
-
-    Ideal para desarrollo y pruebas.
     """
 
     def generate(
         self,
         prompt: str,
-        context: Optional[str] = None
+        context: Optional[str] = None,
     ) -> str:
 
-        respuesta = [
-            "===== MOCK LLM =====",
-            "",
-            "Esta respuesta fue generada localmente.",
-            "",
-            f"Pregunta:",
-            prompt,
-        ]
+        return """
+# Resumen Ejecutivo
 
-        if context:
+El conjunto de datos fue analizado correctamente.
 
-            respuesta.extend([
-                "",
-                "Contexto recibido:",
-                context
-            ])
+## Hallazgos Importantes
 
-        respuesta.extend([
-            "",
-            "Estado:",
-            "MockLLM funcionando correctamente."
-        ])
+- El dataset presenta una estructura consistente.
+- No se detectaron errores críticos.
+- La calidad general de los datos es adecuada para análisis.
 
-        return "\n".join(respuesta)
+## Riesgos Detectados
+
+- No se identifican riesgos importantes.
+- Se recomienda validar periódicamente la calidad de los datos.
+
+## Recomendaciones
+
+- Continuar con el análisis exploratorio.
+- Construir modelos predictivos utilizando las variables relevantes.
+- Monitorear posibles cambios en la distribución de los datos.
+
+## Próximos Pasos
+
+1. Analizar correlaciones.
+2. Evaluar variables objetivo.
+3. Entrenar modelos de Machine Learning.
+4. Generar dashboard ejecutivo.
+
+---
+**MockLLM**
+Informe generado localmente (sin consumir Gemini).
+""".strip()
 
     def health_check(self) -> bool:
         return True
