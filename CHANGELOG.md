@@ -1,160 +1,77 @@
-# 📜 Historial de Cambios
+# 📜 Changelog
 
 Todos los cambios importantes del proyecto **Enterprise AI Data Analyst** serán documentados en este archivo.
 
-Este proyecto sigue un esquema de versionado basado en hitos de desarrollo.
+Este proyecto sigue un esquema de versionado basado en hitos de desarrollo y en los principios de **Semantic Versioning (SemVer)**.
 
 ---
 
-# v1.0.0 (En desarrollo)
+# [0.3.0] - 2026-07-17
 
-## Objetivo
+## 🚀 Añadido
 
-Primera versión estable de la plataforma Enterprise AI Data Analyst.
+- Nuevo proveedor **MockLLM** para desarrollo local sin consumir cuota de Gemini.
+- Integración de **LLMFactory** para desacoplar el proveedor de modelos de IA.
+- Infraestructura preparada para soportar múltiples proveedores LLM:
+  - Google Gemini
+  - OpenAI
+  - Azure OpenAI
+  - Anthropic
+  - Ollama
+- Primer sistema de caché para el análisis completo del dataset en Streamlit.
 
-Características previstas:
+## ⚡ Mejorado
 
-- Plataforma empresarial completa
-- Agentes Inteligentes
-- Sistema RAG
-- Memoria Conversacional
-- Dashboard Interactivo
-- Machine Learning
-- AutoML
-- Reportes Automáticos
-- API REST
-- Seguridad
-- Arquitectura escalable
+- Optimización importante en la generación de gráficos Plotly.
+- Reducción del tiempo de renderizado del dashboard.
+- Organización de las visualizaciones mediante pestañas.
+- Actualización de la interfaz para utilizar la nueva API de Streamlit (`width="stretch"`).
+- Mejor experiencia de usuario durante el análisis de datasets.
 
----
+## 🔧 Refactorización
 
-# v0.9.5
-
-## Testing y Optimización
-
-### Planeado
-
-- Optimización general
-- Corrección de errores
-- Pruebas de rendimiento
-- Mejoras de seguridad
+- Eliminadas las dependencias directas de `GeminiClient`.
+- El motor de IA ahora obtiene el proveedor mediante `LLMFactory`.
+- Separación de responsabilidades entre el motor analítico y los proveedores LLM.
+- Optimización del flujo interno de generación de visualizaciones.
 
 ---
 
-# v0.9.0
+# [0.2.x]
 
-## API REST
+## 🚀 Añadido
 
-### Planeado
+- Enterprise Engine.
+- Application Service.
+- Data Processor.
+- Document Loader.
+- AI Report Engine.
+- Plotly Engine.
+- Visualization Engine.
+- Dashboard HTML.
+- Pipeline completo de análisis.
+- Integración con Google Gemini.
+- Modelo `AnalysisResult` para separar el análisis del renderizado.
 
-- FastAPI
-- Documentación Swagger
-- Endpoints públicos
-- Autenticación
+## ⚡ Mejorado
 
----
-
-# v0.8.0
-
-## Sistema Multiagente
-
-### Planeado
-
-- Coordinador
-- Agente Analista
-- Agente SQL
-- Agente RAG
-- Agente Reportes
+- Recuperación automática cuando Gemini no está disponible.
+- Separación entre lógica de negocio e interfaz.
+- Mejor organización de la arquitectura interna.
 
 ---
 
-# v0.7.0
+# [0.1.0]
 
-## Explainable AI
+## 🚀 Añadido
 
-### Planeado
-
-- Interpretabilidad
-- Explicación de modelos
-- SHAP
-- Feature Importance
-
----
-
-# v0.6.0
-
-## AutoML
-
-### Planeado
-
-- Entrenamiento automático
-- Selección automática de modelos
-- Optimización de hiperparámetros
-
----
-
-# v0.5.0
-
-## Dashboard Inteligente
-
-### Planeado
-
-- Streamlit
-- KPIs
-- Visualizaciones
-- Reportes
-
----
-
-# v0.4.0
-
-## Chat Empresarial
-
-### Planeado
-
-- Chat IA
-- Memoria Conversacional
-- Contexto empresarial
-
----
-
-# v0.3.0
-
-## Sistema RAG
-
-### Planeado
-
-- ChromaDB
-- Embeddings
-- Recuperación de documentos
-- Búsqueda semántica
-
----
-
-# v0.2.0
-
-## Memoria
-
-### Planeado
-
-- Memoria a corto plazo
-- Memoria a largo plazo
-- Historial
-
----
-
-# v0.1.0
-
-## Núcleo
-
-### Completado
-
-- Arquitectura inicial
-- Organización del proyecto
-- README profesional
-- Configuración Git
-- pyproject.toml
-- requirements.txt
-- .env.example
-- LICENSE
-- .gitignore
+- Arquitectura inicial del proyecto.
+- Organización modular.
+- Configuración Git.
+- README profesional.
+- pyproject.toml.
+- requirements.txt.
+- .env.example.
+- LICENSE.
+- .gitignore.
+- Base del proyecto Enterprise AI Data Analyst.
