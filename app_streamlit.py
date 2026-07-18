@@ -27,13 +27,15 @@ from ui.report import Report
 @st.cache_data(show_spinner=False)
 def cached_analysis(dataset_path: str):
     """
-    Ejecuta el análisis completo una sola vez
-    para un mismo dataset.
+    Ejecuta el análisis completo y almacena el resultado
+    para evitar reprocesar el mismo dataset.
     """
 
     app = ApplicationService()
 
-    return app.analyze(dataset_path)
+    result = app.analyze(dataset_path)
+
+    return result
 
 
 # ==========================================================
@@ -73,148 +75,111 @@ def main():
 
     Sidebar.render(dataset)
 
-    st.sidebar.divider()
-
-    analizar = st.sidebar.button(
+    if st.button(
         "🚀 Analizar Dataset",
         width="stretch",
-    )
+    ):
 
-    if not analizar:
-        return
+        with st.spinner("Analizando dataset..."):
 
-    with st.spinner("Analizando dataset..."):
+            result = cached_analysis(str(dataset))
 
-        result = cached_analysis(str(dataset))
+        # ----------------------------------------
 
-    # =====================================================
-    # KPIs
-    # =====================================================
+        app = ApplicationService()
 
-    Metrics.render(
-        rows=len(result.dataframe),
-        columns=len(result.dataframe.columns),
-        numeric_columns=len(
-            result.dataframe.select_dtypes("number").columns
-        ),
-        missing_values=int(
-            result.dataframe.isna().sum().sum()
-        ),
-    )
+        app._last_dataframe = result.dataframe
 
-    st.divider()
+        # ----------------------------------------
 
-    # =====================================================
-    # TABS PRINCIPALES
-    # =====================================================
+        tab1, tab2, tab3, tab4 = st.tabs(
+            [
+                "📊 Resumen",
+                "📈 Visualizaciones",
+                "🤖 Informe IA",
+                "📄 Datos",
+            ]
+        )
 
-    tab1, tab2, tab3, tab4 = st.tabs(
-        [
-            "📊 Resumen",
-            "📈 Visualizaciones",
-            "🤖 Informe IA",
-            "📋 Datos",
-        ]
-    )
+        # ==================================================
+        # TAB RESUMEN
+        # ==================================================
 
-    # =====================================================
-    # RESUMEN
-    # =====================================================
+        with tab1:
 
-    with tab1:
-
-        st.subheader("Resumen del Dataset")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-
-            st.metric(
-                "Filas",
-                f"{len(result.dataframe):,}"
+            Metrics.render(
+                rows=len(result.dataframe),
+                columns=len(result.dataframe.columns),
+                numeric_columns=len(
+                    result.dataframe.select_dtypes("number").columns
+                ),
+                missing_values=int(
+                    result.dataframe.isna().sum().sum()
+                ),
             )
 
-            st.metric(
-                "Columnas",
-                len(result.dataframe.columns)
+            st.success(
+                "Análisis completado correctamente."
             )
 
-        with col2:
+        # ==================================================
+        # TAB GRAFICOS
+        # ==================================================
 
-            memoria = (
-                result.dataframe.memory_usage(
-                    deep=True
-                ).sum()
-                / 1024
-                / 1024
+        with tab2:
+
+            Charts.render(
+                result.dashboard.figures
             )
 
-            st.metric(
-                "Memoria",
-                f"{memoria:.2f} MB"
+        # ==================================================
+        # TAB INFORME IA
+        # ==================================================
+
+        with tab3:
+
+            Report.render(
+                result.report
             )
 
-            st.metric(
-                "Valores nulos",
-                int(
-                    result.dataframe
-                    .isna()
-                    .sum()
-                    .sum()
-                )
+            st.divider()
+
+            st.subheader("💬 Chat con el Dataset")
+
+            question = st.text_input(
+                "Escribe una pregunta sobre el dataset",
+                placeholder="Ejemplo: ¿Cuántas filas tiene el dataset?"
             )
 
-        st.info(
-            "Seleccione la pestaña "
-            "**Visualizaciones** "
-            "para explorar los gráficos."
-        )
+            if st.button(
+                "Preguntar",
+                key="chat_button",
+            ):
 
-    # =====================================================
-    # VISUALIZACIONES
-    # =====================================================
+                if question.strip():
 
-    with tab2:
+                    answer = app.ask(question)
 
-        st.subheader("Visualizaciones")
+                    st.markdown("### 🤖 Respuesta")
 
-        Charts.render(
-            result.dashboard.figures
-        )
+                    st.write(answer)
 
-    # =====================================================
-    # INFORME IA
-    # =====================================================
+                else:
 
-    with tab3:
+                    st.warning(
+                        "Escribe una pregunta."
+                    )
 
-        st.subheader(
-            "Reporte Ejecutivo"
-        )
+        # ==================================================
+        # TAB DATOS
+        # ==================================================
 
-        Report.render(
-            result.report
-        )
+        with tab4:
 
-    # =====================================================
-    # DATOS
-    # =====================================================
-
-    with tab4:
-
-        st.subheader(
-            "Vista previa del Dataset"
-        )
-
-        st.dataframe(
-            result.dataframe,
-            width="stretch",
-            height=650,
-        )
-
-    st.success(
-        "Análisis completado correctamente."
-    )
+            st.dataframe(
+                result.dataframe,
+                width="stretch",
+            )
 
 
 if __name__ == "__main__":
