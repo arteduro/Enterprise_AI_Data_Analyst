@@ -1,7 +1,7 @@
 """
 ui/chat.py
 
-Componente de conversación con el dataset.
+Componente visual del Chat con el Dataset.
 
 Autor: Edgar Arteaga
 """
@@ -13,64 +13,76 @@ import streamlit as st
 
 class Chat:
     """
-    Interfaz del Chat con el Dataset.
+    Interfaz del Chat IA.
     """
 
     @staticmethod
     def render(app):
 
+        st.divider()
+
         st.subheader("💬 Chat con el Dataset")
 
         st.caption(
-            "Haz preguntas sobre el dataset utilizando lenguaje natural."
+            "Haz preguntas en lenguaje natural sobre tus datos."
         )
 
-        question = st.text_input(
-            "Pregunta",
-            placeholder="Ejemplo: ¿Cuántas filas tiene el dataset?",
-            key="dataset_chat_question",
+        # ==================================================
+        # HISTORIAL
+        # ==================================================
+
+        if "chat_history" not in st.session_state:
+
+            st.session_state.chat_history = []
+
+        # ==================================================
+        # EJEMPLOS
+        # ==================================================
+
+        with st.expander("💡 Ejemplos de preguntas"):
+
+            st.markdown("""
+- ¿Cuántas filas tiene el dataset?
+- ¿Cuántas columnas tiene?
+- ¿Cuántos valores nulos existen?
+- ¿Cuáles son las variables numéricas?
+- ¿Cuál es el promedio de Ventas?
+- ¿Cuál es el máximo de Ventas?
+- ¿Cuál es el promedio de Utilidad?
+- ¿Cuál es el máximo de Margen?
+""")
+
+        # ==================================================
+        # HISTORIAL VISUAL
+        # ==================================================
+
+        for question, answer in st.session_state.chat_history:
+
+            with st.chat_message("user"):
+
+                st.write(question)
+
+            with st.chat_message("assistant"):
+
+                st.write(answer)
+
+        # ==================================================
+        # INPUT
+        # ==================================================
+
+        question = st.chat_input(
+            "Escribe una pregunta sobre el dataset..."
         )
 
-        col1, col2 = st.columns([1, 4])
+        if question:
 
-        with col1:
+            answer = app.ask(question)
 
-            ask = st.button(
-                "Preguntar",
-                width="stretch",
+            st.session_state.chat_history.append(
+                (
+                    question,
+                    answer,
+                )
             )
-
-        with col2:
-
-            clear = st.button(
-                "Limpiar",
-                width="stretch",
-            )
-
-        if clear:
-
-            st.session_state.dataset_chat_question = ""
 
             st.rerun()
-
-        if ask:
-
-            if not question.strip():
-
-                st.warning(
-                    "Escribe una pregunta."
-                )
-
-                return
-
-            with st.spinner(
-                "Consultando el Analista IA..."
-            ):
-
-                answer = app.ask(question)
-
-            st.markdown("---")
-
-            st.markdown("### 🤖 Respuesta")
-
-            st.write(answer)
