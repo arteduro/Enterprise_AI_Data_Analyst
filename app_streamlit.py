@@ -1,7 +1,9 @@
 """
 app_streamlit.py
 
-Interfaz principal de Enterprise AI Data Analyst.
+Enterprise AI Data Analyst
+
+Frontend V2
 
 Autor: Edgar Arteaga
 """
@@ -10,36 +12,16 @@ from __future__ import annotations
 
 import streamlit as st
 
-from core.application.application_service import ApplicationService
+from core.application.session_manager import SessionManager
 from core.dataset_selector import DatasetSelector
 
-from ui.sidebar import Sidebar
 from ui.header import Header
-from ui.metrics import Metrics
-from ui.charts import Charts
-from ui.report import Report
+from ui.sidebar import Sidebar
+from ui.main_layout import MainLayout
 
 
 # ==========================================================
-# CACHE DEL ANALISIS COMPLETO
-# ==========================================================
-
-@st.cache_data(show_spinner=False)
-def cached_analysis(dataset_path: str):
-    """
-    Ejecuta el análisis completo y almacena el resultado
-    para evitar reprocesar el mismo dataset.
-    """
-
-    app = ApplicationService()
-
-    result = app.analyze(dataset_path)
-
-    return result
-
-
-# ==========================================================
-# CONFIGURACION STREAMLIT
+# CONFIGURACIÓN STREAMLIT
 # ==========================================================
 
 st.set_page_config(
@@ -48,14 +30,28 @@ st.set_page_config(
     layout="wide",
 )
 
+# ==========================================================
+# SESSION
+# ==========================================================
 
-# ==========================================================
-# INTERFAZ PRINCIPAL
-# ==========================================================
+SessionManager.initialize()
+
+app = SessionManager.app()
 
 def main():
+    """
+    Punto de entrada principal de la aplicación.
+    """
+
+    # ======================================================
+    # HEADER
+    # ======================================================
 
     Header.render()
+
+    # ======================================================
+    # DATASETS
+    # ======================================================
 
     selector = DatasetSelector()
 
@@ -63,7 +59,9 @@ def main():
 
     if not datasets:
 
-        st.error("No existen datasets disponibles.")
+        st.error(
+            "No existen datasets disponibles."
+        )
 
         return
 
@@ -75,111 +73,56 @@ def main():
 
     Sidebar.render(dataset)
 
+    # ======================================================
+    # BOTÓN ANALIZAR
+    # ======================================================
+
     if st.button(
         "🚀 Analizar Dataset",
-        width="stretch",
+        use_container_width=True,
     ):
 
-        with st.spinner("Analizando dataset..."):
+        with st.spinner(
+            "Analizando dataset..."
+        ):
 
-            result = cached_analysis(str(dataset))
+            result = app.analyze(
+                str(dataset)
+            )
 
-        # ----------------------------------------
+            SessionManager.set_analysis_result(
+                result
+            )
 
-        app = ApplicationService()
-
-        app._last_dataframe = result.dataframe
-
-        # ----------------------------------------
-
-        tab1, tab2, tab3, tab4 = st.tabs(
-            [
-                "📊 Resumen",
-                "📈 Visualizaciones",
-                "🤖 Informe IA",
-                "📄 Datos",
-            ]
+        st.success(
+            "Dataset analizado correctamente."
         )
 
-        # ==================================================
-        # TAB RESUMEN
-        # ==================================================
+        st.rerun()
 
-        with tab1:
+    # ======================================================
+    # MOSTRAR ÚLTIMO ANÁLISIS
+    # ======================================================
 
-            Metrics.render(
-                rows=len(result.dataframe),
-                columns=len(result.dataframe.columns),
-                numeric_columns=len(
-                    result.dataframe.select_dtypes("number").columns
-                ),
-                missing_values=int(
-                    result.dataframe.isna().sum().sum()
-                ),
-            )
+    result = SessionManager.analysis_result()
 
-            st.success(
-                "Análisis completado correctamente."
-            )
+    if result is None:
 
-        # ==================================================
-        # TAB GRAFICOS
-        # ==================================================
+        st.info(
+            "Selecciona un dataset y pulsa "
+            "'Analizar Dataset'."
+        )
 
-        with tab2:
+        return
 
-            Charts.render(
-                result.dashboard.figures
-            )
+    # ======================================================
+    # FRONTEND V2
+    # ======================================================
 
-        # ==================================================
-        # TAB INFORME IA
-        # ==================================================
-
-        with tab3:
-
-            Report.render(
-                result.report
-            )
-
-            st.divider()
-
-            st.subheader("💬 Chat con el Dataset")
-
-            question = st.text_input(
-                "Escribe una pregunta sobre el dataset",
-                placeholder="Ejemplo: ¿Cuántas filas tiene el dataset?"
-            )
-
-            if st.button(
-                "Preguntar",
-                key="chat_button",
-            ):
-
-                if question.strip():
-
-                    answer = app.ask(question)
-
-                    st.markdown("### 🤖 Respuesta")
-
-                    st.write(answer)
-
-                else:
-
-                    st.warning(
-                        "Escribe una pregunta."
-                    )
-
-        # ==================================================
-        # TAB DATOS
-        # ==================================================
-
-        with tab4:
-
-            st.dataframe(
-                result.dataframe,
-                width="stretch",
-            )
+    MainLayout.render(
+        app=app,
+        result=result,
+    )
 
 
 if __name__ == "__main__":

@@ -27,17 +27,8 @@ class Chat:
             "Haz preguntas en lenguaje natural sobre tus datos."
         )
 
-        # ==================================================
-        # HISTORIAL
-        # ==================================================
-
         if "chat_history" not in st.session_state:
-
             st.session_state.chat_history = []
-
-        # ==================================================
-        # EJEMPLOS
-        # ==================================================
 
         with st.expander("💡 Ejemplos de preguntas"):
 
@@ -52,37 +43,36 @@ class Chat:
 - ¿Cuál es el máximo de Margen?
 """)
 
-        # ==================================================
-        # HISTORIAL VISUAL
-        # ==================================================
+        # Mostrar historial
+        for item in st.session_state.chat_history:
 
-        for question, answer in st.session_state.chat_history:
+            st.markdown(f"**👤 Tú:** {item['question']}")
+            st.markdown(f"**🤖 IA:** {item['answer']}")
+            st.divider()
 
-            with st.chat_message("user"):
-
-                st.write(question)
-
-            with st.chat_message("assistant"):
-
-                st.write(answer)
-
-        # ==================================================
-        # INPUT
-        # ==================================================
-
-        question = st.chat_input(
-            "Escribe una pregunta sobre el dataset..."
+        question = st.text_input(
+            "Pregunta",
+            placeholder="Ejemplo: ¿Cuál es el promedio de Ventas?",
+            key="chat_input_v2",
         )
 
-        if question:
+        if st.button(
+            "🚀 Preguntar",
+            key="chat_button_v2",
+            use_container_width=True,
+        ):
+
+            if not question.strip():
+                st.warning("Escribe una pregunta.")
+                return
 
             answer = app.ask(question)
 
             st.session_state.chat_history.append(
-                (
-                    question,
-                    answer,
-                )
+                {
+                    "question": question,
+                    "answer": answer,
+                }
             )
 
             st.rerun()
