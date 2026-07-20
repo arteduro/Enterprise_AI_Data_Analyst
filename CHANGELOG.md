@@ -2,7 +2,135 @@
 
 Todos los cambios importantes del proyecto **Enterprise AI Data Analyst** serán documentados en este archivo.
 
-Este proyecto sigue un esquema de versionado basado en hitos de desarrollo y en los principios de **Semantic Versioning (SemVer)**.
+Este proyecto sigue un esquema de versionado basado en **Semantic Versioning (SemVer)**.
+
+---
+
+# [0.8.0] - 2026-07-19
+
+## 🚀 Añadido
+
+### 🧠 Enterprise AI Context Engine
+
+- Nuevo motor inteligente de contexto para Gemini.
+- Construcción automática de contexto antes de cada consulta.
+- Integración del perfil completo del dataset dentro del prompt.
+- Contexto enriquecido con:
+  - Variables numéricas
+  - Variables categóricas
+  - Estadísticas descriptivas
+  - Dataset Profile
+  - Historial conversacional
+  - Pregunta actual
+
+### 💬 Memoria Conversacional
+
+- Nuevo módulo `ConversationMemory`.
+- Registro automático de:
+  - preguntas del usuario
+  - respuestas de la IA.
+- Historial reutilizable entre consultas.
+- Funciones para limpiar memoria.
+- Preparado para persistencia futura.
+
+### 📊 Dataset Profile
+
+Nuevo sistema de perfil inteligente del dataset.
+
+Incluye:
+
+- Número de filas.
+- Número de columnas.
+- Variables numéricas.
+- Variables categóricas.
+- Valores nulos.
+- Estadísticas descriptivas.
+- Variables disponibles para la IA.
+- Resumen ejecutivo del dataset.
+
+### 🧩 Context Builder
+
+Nuevo módulo encargado de construir el prompt completo para Gemini.
+
+Combina automáticamente:
+
+- Dataset Profile.
+- Memoria conversacional.
+- Contexto del análisis.
+- Pregunta actual.
+
+### 🧭 Router Inteligente
+
+Se consolida el sistema de enrutamiento de consultas.
+
+Rutas disponibles:
+
+- Motor interno.
+- Gemini.
+- Híbrido (preparado para próximas versiones).
+
+### 🤖 Integración IA
+
+- Gemini ahora recibe contexto empresarial completo.
+- Respuestas mucho más específicas.
+- Menor alucinación del modelo.
+- Mayor coherencia entre preguntas consecutivas.
+
+---
+
+## ⚡ Mejorado
+
+- Mayor calidad de respuestas generadas por Gemini.
+- El modelo ya conoce el dataset sin necesidad de repetir información.
+- El chat mantiene continuidad entre preguntas.
+- Mejor organización del flujo Application → Context → LLM.
+- Preparación completa para RAG.
+
+---
+
+## 🔧 Refactorización
+
+Se reorganizó la arquitectura del proyecto.
+
+Nuevos paquetes:
+
+```
+core/context
+core/memory
+core/profile
+core/services
+core/routing
+```
+
+Se desacoplaron responsabilidades entre:
+
+- ApplicationService
+- ContextBuilder
+- ConversationMemory
+- DatasetProfile
+- LLMService
+
+La aplicación ahora sigue una arquitectura mucho más cercana a sistemas Enterprise AI modernos.
+
+---
+
+# [0.7.0] - 2026-07-19
+
+## 🚀 Añadido
+
+- Router Inteligente de IA.
+- Integración oficial con Google Gemini.
+- Nuevo `LLMService`.
+- `ApplicationService` como punto único de entrada.
+- Detección automática entre consultas internas y consultas IA.
+- Mensaje amigable cuando la cuota gratuita de Gemini se encuentra agotada.
+
+---
+
+## ⚡ Mejorado
+
+- Mejor separación entre reglas de negocio y comunicación con la IA.
+- Arquitectura preparada para múltiples proveedores LLM.
 
 ---
 
@@ -10,30 +138,27 @@ Este proyecto sigue un esquema de versionado basado en hitos de desarrollo y en 
 
 ## 🚀 Añadido
 
-- Nuevo proveedor **MockLLM** para desarrollo local sin consumir cuota de Gemini.
-- Integración de **LLMFactory** para desacoplar el proveedor de modelos de IA.
-- Infraestructura preparada para soportar múltiples proveedores LLM:
+- Nuevo proveedor **MockLLM** para desarrollo local.
+- Integración de **LLMFactory**.
+- Infraestructura preparada para múltiples proveedores:
   - Google Gemini
   - OpenAI
   - Azure OpenAI
   - Anthropic
   - Ollama
-- Primer sistema de caché para el análisis completo del dataset en Streamlit.
+- Caché para análisis del dataset.
 
 ## ⚡ Mejorado
 
-- Optimización importante en la generación de gráficos Plotly.
-- Reducción del tiempo de renderizado del dashboard.
-- Organización de las visualizaciones mediante pestañas.
-- Actualización de la interfaz para utilizar la nueva API de Streamlit (`width="stretch"`).
-- Mejor experiencia de usuario durante el análisis de datasets.
+- Optimización del dashboard Plotly.
+- Mejor rendimiento de Streamlit.
+- Uso de pestañas.
+- Adaptación a la nueva API de Streamlit.
 
 ## 🔧 Refactorización
 
-- Eliminadas las dependencias directas de `GeminiClient`.
-- El motor de IA ahora obtiene el proveedor mediante `LLMFactory`.
-- Separación de responsabilidades entre el motor analítico y los proveedores LLM.
-- Optimización del flujo interno de generación de visualizaciones.
+- Eliminadas dependencias directas de Gemini.
+- Separación entre motor analítico y proveedores LLM.
 
 ---
 
@@ -51,13 +176,12 @@ Este proyecto sigue un esquema de versionado basado en hitos de desarrollo y en 
 - Dashboard HTML.
 - Pipeline completo de análisis.
 - Integración con Google Gemini.
-- Modelo `AnalysisResult` para separar el análisis del renderizado.
+- Modelo `AnalysisResult`.
 
 ## ⚡ Mejorado
 
 - Recuperación automática cuando Gemini no está disponible.
 - Separación entre lógica de negocio e interfaz.
-- Mejor organización de la arquitectura interna.
 
 ---
 
@@ -65,13 +189,12 @@ Este proyecto sigue un esquema de versionado basado en hitos de desarrollo y en 
 
 ## 🚀 Añadido
 
-- Arquitectura inicial del proyecto.
+- Arquitectura inicial.
 - Organización modular.
-- Configuración Git.
 - README profesional.
+- GitHub inicial.
 - pyproject.toml.
 - requirements.txt.
 - .env.example.
 - LICENSE.
 - .gitignore.
-- Base del proyecto Enterprise AI Data Analyst.
