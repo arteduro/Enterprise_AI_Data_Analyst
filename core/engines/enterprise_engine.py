@@ -23,6 +23,12 @@ from core.layouts.dashboard_layout import DashboardLayout
 from core.models.analysis_result import AnalysisResult
 from core.models.dashboard_config import DashboardConfig
 
+# =====================================================
+# NUEVO
+# =====================================================
+
+from core.profile import DatasetProfiler
+
 
 class EnterpriseEngine:
     """
@@ -41,13 +47,20 @@ class EnterpriseEngine:
 
         self.plotly = PlotlyEngine()
 
+        # ==============================================
+        # NUEVO
+        # ==============================================
+
+        self.profiler = DatasetProfiler()
+
+    # =====================================================
+    # ANALIZAR ARCHIVO
+    # =====================================================
+
     def analyze_file(
         self,
         file_path: str | Path,
     ) -> str:
-        """
-        Analiza un archivo y genera el dashboard HTML.
-        """
 
         dataframe = self.loader.load(file_path)
 
@@ -67,15 +80,30 @@ class EnterpriseEngine:
 
         return str(output.resolve())
 
+    # =====================================================
+    # ANALIZAR DATAFRAME
+    # =====================================================
+
     def analyze_dataframe(
         self,
         dataframe: pd.DataFrame,
     ) -> AnalysisResult:
-        """
-        Analiza un DataFrame completo.
-        """
 
-        analysis = self.processor.profile(dataframe)
+        # ==========================================
+        # PERFIL DEL DATASET
+        # ==========================================
+
+        profile = self.profiler.build(
+            dataframe
+        )
+
+        # ==========================================
+        # ANÁLISIS
+        # ==========================================
+
+        analysis = self.processor.profile(
+            dataframe
+        )
 
         report = self.ai.generate_report(
             analysis.ai_context,
@@ -85,34 +113,55 @@ class EnterpriseEngine:
 
             self.plotly.create_figure(
                 dataframe,
-                self.visualization.create_histogram(dataframe),
+                self.visualization.create_histogram(
+                    dataframe
+                ),
             ),
 
             self.plotly.create_figure(
                 dataframe,
-                self.visualization.create_boxplot(dataframe),
+                self.visualization.create_boxplot(
+                    dataframe
+                ),
             ),
 
             self.plotly.create_figure(
                 dataframe,
-                self.visualization.create_correlation(dataframe),
+                self.visualization.create_correlation(
+                    dataframe
+                ),
             ),
 
             self.plotly.create_figure(
                 dataframe,
-                self.visualization.create_bar_chart(dataframe),
+                self.visualization.create_bar_chart(
+                    dataframe
+                ),
             ),
         ]
 
         dashboard = DashboardConfig(
+
             title="Enterprise AI Data Analyst",
+
             description="Dashboard generado automáticamente",
+
             figures=figures,
+
             report=report.report,
         )
 
+        # ==========================================
+        # RESULTADO
+        # ==========================================
+
         return AnalysisResult(
+
             dataframe=dataframe,
+
+            profile=profile,
+
             dashboard=dashboard,
+
             report=report.report,
         )
