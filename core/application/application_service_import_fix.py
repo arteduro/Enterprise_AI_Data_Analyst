@@ -25,17 +25,15 @@ from core.routing.intent_router import (
     Route,
 )
 from core.services.llm_service import LLMService
-
-from core.response.response_controller import (
-    ResponseController,
-)
-
 from core.monitoring.token_optimizer import (
     TokenOptimizer,
 )
 
 from core.routing.prompt_router import (
     PromptRouter,
+)
+
+    TokenOptimizer,
 )
 
 
@@ -87,8 +85,6 @@ class ApplicationService:
         # =====================================
 
         self.llm = LLMService()
-
-        self.response_controller = ResponseController()
 
         # =====================================
         # MEMORIA CONVERSACIONAL
@@ -197,8 +193,6 @@ class ApplicationService:
                 question,
             )
 
-
-
             self.memory.add_assistant_message(
                 answer
             )
@@ -227,19 +221,10 @@ class ApplicationService:
                 question=question,
             )
 
-            max_tokens = (
-                self.response_controller.max_output_tokens(
-                    prompt_type
-                )
-            )
-
             answer = self.llm.ask(
                 question=question,
                 context=context,
-                max_output_tokens=max_tokens,
             )
-
-
 
             self.memory.add_assistant_message(
                 answer

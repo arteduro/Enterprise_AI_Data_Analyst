@@ -10,6 +10,7 @@ Autor: Edgar Arteaga
 from typing import Optional
 
 from google import genai
+from google.genai import types
 
 from config.settings import settings
 from config.logging_config import get_logger
@@ -41,7 +42,8 @@ class GeminiClient(BaseLLM):
     def generate(
         self,
         prompt: str,
-        context: Optional[str] = None
+        context: Optional[str] = None,
+        max_output_tokens: int = 512,
     ) -> str:
 
         if context:
@@ -54,13 +56,34 @@ class GeminiClient(BaseLLM):
             )
 
         logger.info("Consultando Gemini...")
+        print(f"[Gemini] max_output_tokens = {max_output_tokens}")
 
         response = self.client.models.generate_content(
             model=settings.GEMINI_MODEL,
             contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.2,
+                top_p=0.9,
+                max_output_tokens=max_output_tokens,
+            ),
         )
 
         logger.info("Respuesta recibida.")
+
+        print("\n===== GEMINI DEBUG =====")
+
+        try:
+            candidate = response.candidates[0]
+
+            print("Finish reason:", candidate.finish_reason)
+
+            if hasattr(candidate, "token_count"):
+                print("Token count:", candidate.token_count)
+
+        except Exception as e:
+            print("No fue posible obtener finish_reason:", e)
+
+        print("========================\n")
 
         return response.text
 

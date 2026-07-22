@@ -14,9 +14,6 @@ from __future__ import annotations
 import pandas as pd
 
 from core.routing.prompt_router import PromptType
-from core.prompt.answer_style import AnswerStyle
-from core.models.context_request import ContextRequest
-from core.context.context_compressor import ContextCompressor
 from core.prompts.prompt_builder import PromptBuilder
 
 
@@ -29,8 +26,6 @@ class ContextBuilder:
     def __init__(self):
 
         self.prompt_builder = PromptBuilder()
-
-        self.compressor = ContextCompressor()
 
     # =====================================================
     # SHORT
@@ -101,7 +96,6 @@ Responde con un resumen ejecutivo.
 
     def build_analysis_context(
         self,
-        prompt_type: PromptType,
         dataframe: pd.DataFrame,
         memory: str,
         knowledge: str,
@@ -110,33 +104,15 @@ Responde con un resumen ejecutivo.
 
         rows, cols = dataframe.shape
 
-        compressed = self.compressor.compress(
-            dataframe=dataframe,
-            memory=memory,
-            knowledge=knowledge,
-            prompt_type=prompt_type,
-            question=question,
-        )
+        columns = ", ".join(dataframe.columns)
 
-        columns = compressed["columns"]
-        memory = compressed.get("memory", memory)
-        knowledge = compressed.get("knowledge", knowledge)
-
-        prompt = self.prompt_builder.build_analysis_prompt(
+        return self.prompt_builder.build_analysis_prompt(
             rows=rows,
             cols=cols,
             columns=columns,
             knowledge=knowledge,
             memory=memory,
             question=question,
-        )
-
-        style = AnswerStyle.instructions(prompt_type)
-
-        return (
-            prompt
-            + "\n\n"
-            + style
         )
 
     # =====================================================
@@ -152,7 +128,6 @@ Responde con un resumen ejecutivo.
     ) -> str:
 
         context = self.build_analysis_context(
-            PromptType.REPORT,
             dataframe,
             memory,
             knowledge,
@@ -202,7 +177,6 @@ Responde con un resumen ejecutivo.
             )
 
         return self.build_analysis_context(
-            prompt_type,
             dataframe,
             memory,
             knowledge,

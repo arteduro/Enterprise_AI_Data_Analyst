@@ -26,18 +26,6 @@ from core.routing.intent_router import (
 )
 from core.services.llm_service import LLMService
 
-from core.response.response_controller import (
-    ResponseController,
-)
-
-from core.monitoring.token_optimizer import (
-    TokenOptimizer,
-)
-
-from core.routing.prompt_router import (
-    PromptRouter,
-)
-
 
 class ApplicationService:
     """
@@ -52,7 +40,6 @@ class ApplicationService:
     • Memoria Conversacional
     • Context Builder
     • Knowledge Base
-    • Token Optimizer
     """
 
     def __init__(self):
@@ -76,19 +63,10 @@ class ApplicationService:
         self.router = IntentRouter()
 
         # =====================================
-        # PROMPT ROUTER
-        # =====================================
-
-        self.prompt_router = PromptRouter()
-
-
-        # =====================================
         # SERVICIO LLM
         # =====================================
 
         self.llm = LLMService()
-
-        self.response_controller = ResponseController()
 
         # =====================================
         # MEMORIA CONVERSACIONAL
@@ -107,12 +85,6 @@ class ApplicationService:
         # =====================================
 
         self.knowledge = KnowledgeBase()
-
-        # =====================================
-        # TOKEN OPTIMIZER
-        # =====================================
-
-        self.token_optimizer = TokenOptimizer()
 
         # =====================================
         # DATASET ACTUAL
@@ -177,16 +149,6 @@ class ApplicationService:
         route = self.router.route(question)
 
         # =====================================
-        # TOKEN OPTIMIZER
-        # =====================================
-
-        self.token_optimizer.reset()
-
-        self.token_optimizer.configure(route)
-
-        self.token_optimizer.start()
-
-        # =====================================
         # MOTOR LOCAL
         # =====================================
 
@@ -197,13 +159,9 @@ class ApplicationService:
                 question,
             )
 
-
-
             self.memory.add_assistant_message(
                 answer
             )
-
-            self.token_optimizer.finish()
 
             return answer
 
@@ -217,35 +175,21 @@ class ApplicationService:
 
             knowledge = self.knowledge.summary()
 
-            prompt_type = self.prompt_router.route(question)
-
             context = self.context_builder.build(
-                prompt_type=prompt_type,
                 dataframe=self.current_dataframe,
                 memory=memory,
                 knowledge=knowledge,
                 question=question,
             )
 
-            max_tokens = (
-                self.response_controller.max_output_tokens(
-                    prompt_type
-                )
-            )
-
             answer = self.llm.ask(
                 question=question,
                 context=context,
-                max_output_tokens=max_tokens,
             )
-
-
 
             self.memory.add_assistant_message(
                 answer
             )
-
-            self.token_optimizer.finish()
 
             return answer
 
@@ -260,8 +204,6 @@ class ApplicationService:
         self.memory.add_assistant_message(
             answer
         )
-
-        self.token_optimizer.finish()
 
         return answer
 
@@ -304,14 +246,6 @@ class ApplicationService:
     def knowledge_data(self):
 
         return self.knowledge.get()
-
-    # =====================================================
-    # TOKEN OPTIMIZER
-    # =====================================================
-
-    def monitoring(self):
-
-        return self.token_optimizer.metrics()
 
     # =====================================================
     # COMPATIBILIDAD CLI

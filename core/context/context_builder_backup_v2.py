@@ -14,9 +14,6 @@ from __future__ import annotations
 import pandas as pd
 
 from core.routing.prompt_router import PromptType
-from core.prompt.answer_style import AnswerStyle
-from core.models.context_request import ContextRequest
-from core.context.context_compressor import ContextCompressor
 from core.prompts.prompt_builder import PromptBuilder
 
 
@@ -30,7 +27,6 @@ class ContextBuilder:
 
         self.prompt_builder = PromptBuilder()
 
-        self.compressor = ContextCompressor()
 
     # =====================================================
     # SHORT
@@ -101,7 +97,6 @@ Responde con un resumen ejecutivo.
 
     def build_analysis_context(
         self,
-        prompt_type: PromptType,
         dataframe: pd.DataFrame,
         memory: str,
         knowledge: str,
@@ -110,34 +105,53 @@ Responde con un resumen ejecutivo.
 
         rows, cols = dataframe.shape
 
-        compressed = self.compressor.compress(
-            dataframe=dataframe,
-            memory=memory,
-            knowledge=knowledge,
-            prompt_type=prompt_type,
-            question=question,
-        )
+        columns = ", ".join(dataframe.columns)
 
-        columns = compressed["columns"]
-        memory = compressed.get("memory", memory)
-        knowledge = compressed.get("knowledge", knowledge)
+        return f"""
+=========================
+ENTERPRISE AI ANALYSIS
+=========================
 
-        prompt = self.prompt_builder.build_analysis_prompt(
-            rows=rows,
-            cols=cols,
-            columns=columns,
-            knowledge=knowledge,
-            memory=memory,
-            question=question,
-        )
+DATASET
 
-        style = AnswerStyle.instructions(prompt_type)
+Filas:
+{rows}
 
-        return (
-            prompt
-            + "\n\n"
-            + style
-        )
+Columnas:
+{cols}
+
+Variables:
+
+{columns}
+
+----------------------------
+
+KNOWLEDGE BASE
+
+{knowledge}
+
+----------------------------
+
+MEMORIA
+
+{memory}
+
+----------------------------
+
+PREGUNTA
+
+{question}
+
+----------------------------
+
+INSTRUCCIONES
+
+Analiza profundamente.
+
+No inventes datos.
+
+Entrega conclusiones y recomendaciones.
+""".strip()
 
     # =====================================================
     # REPORT
@@ -152,7 +166,6 @@ Responde con un resumen ejecutivo.
     ) -> str:
 
         context = self.build_analysis_context(
-            PromptType.REPORT,
             dataframe,
             memory,
             knowledge,
@@ -202,7 +215,6 @@ Responde con un resumen ejecutivo.
             )
 
         return self.build_analysis_context(
-            prompt_type,
             dataframe,
             memory,
             knowledge,
