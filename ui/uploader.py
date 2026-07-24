@@ -1,109 +1,112 @@
 """
 ui/uploader.py
 
-Componente encargado de seleccionar datasets.
+Enterprise Dataset Uploader
 
-Permite:
-
-- Subir Excel
-- Subir CSV
-- Elegir datasets existentes
+Responsabilidades
+-----------------
+- Mostrar datasets disponibles.
+- Permitir subir nuevos datasets.
+- Activar el dataset seleccionado.
+- Mantener el Dataset Demo.
 
 Autor: Edgar Arteaga
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 import shutil
 
 import streamlit as st
 
+from core.ingestion.dataset_manager import DatasetManager
+from core.application.session_manager import SessionManager
 
-DATASET_DIR = Path("datasets")
 
-
-def render() -> Path | None:
+class Uploader:
     """
-    Devuelve el dataset seleccionado.
+    Componente encargado de gestionar
+    la carga y selección de datasets.
     """
 
-    st.subheader("📂 Dataset")
+    @staticmethod
+    def render() -> Path | None:
 
-    option = st.radio(
-        "Seleccione una opción",
-        (
-            "Usar dataset existente",
-            "Subir nuevo dataset",
-        ),
-    )
+        manager = SessionManager.dataset_manager()
 
-    # ---------------------------------------------------------
-    # DATASET EXISTENTE
-    # ---------------------------------------------------------
+        st.subheader("📂 Dataset")
 
-    if option == "Usar dataset existente":
+        option = st.radio(
+            "Seleccione una opción",
+            (
+                "Usar dataset existente",
+                "Subir nuevo dataset",
+            ),
+        )
 
-        datasets = sorted(DATASET_DIR.glob("*"))
+        # ----------------------------------------
+        # DATASET EXISTENTE
+        # ----------------------------------------
 
-        datasets = [
-            d for d in datasets
-            if d.suffix.lower()
-            in (
-                ".xlsx",
-                ".xls",
-                ".csv",
-                ".parquet",
-                ".json",
+        if option == "Usar dataset existente":
+
+            datasets = manager.list_available_datasets()
+
+            if not datasets:
+
+                st.warning(
+                    "No existen datasets disponibles."
+                )
+
+                return None
+
+            selected = st.selectbox(
+                "Dataset",
+                datasets,
+                format_func=lambda x: x.name,
             )
-        ]
 
-        if not datasets:
+            manager.activate_dataset(selected)
 
-            st.warning(
-                "No existen datasets en la carpeta datasets/"
-            )
+            return selected
+
+        # ----------------------------------------
+        # SUBIR DATASET
+        # ----------------------------------------
+
+        uploaded = st.file_uploader(
+            "Seleccione un archivo",
+            type=[
+                "xlsx",
+                "xls",
+                "csv",
+                "json",
+                "parquet",
+            ],
+        )
+
+        if uploaded is None:
 
             return None
 
-        selected = st.selectbox(
-
-            "Dataset",
-
-            datasets,
-
-            format_func=lambda x: x.name,
-
+        destination = (
+            manager.UPLOADED_FOLDER / uploaded.name
         )
 
-        return selected
+        destination.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-    # ---------------------------------------------------------
-    # SUBIR ARCHIVO
-    # ---------------------------------------------------------
+        with open(destination, "wb") as f:
 
-    uploaded = st.file_uploader(
+            shutil.copyfileobj(uploaded, f)
 
-        "Seleccione un archivo",
+        manager.activate_dataset(destination)
 
-        type=[
-            "xlsx",
-            "xls",
-            "csv",
-            "parquet",
-            "json",
-        ],
+        st.success(
+            f"{uploaded.name} cargado correctamente."
+        )
 
-    )
-
-    if uploaded is None:
-
-        return None
-
-    destination = DATASET_DIR / uploaded.name
-
-    with open(destination, "wb") as f:
-
-        shutil.copyfileobj(uploaded, f)
-
-    st.success("Dataset cargado correctamente.")
-
-    return destination
+        return destination

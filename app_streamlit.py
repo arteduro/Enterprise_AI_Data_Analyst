@@ -3,7 +3,7 @@ app_streamlit.py
 
 Enterprise AI Data Analyst
 
-Frontend V2
+Frontend principal
 
 Autor: Edgar Arteaga
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 import streamlit as st
 
 from core.application.session_manager import SessionManager
-from core.dataset_selector import DatasetSelector
+from core.ingestion.dataset_manager import DatasetManager
 
 from ui.header import Header
 from ui.sidebar import Sidebar
@@ -38,9 +38,12 @@ SessionManager.initialize()
 
 app = SessionManager.app()
 
+dataset_manager = SessionManager.dataset_manager()
+
+
 def main():
     """
-    Punto de entrada principal de la aplicación.
+    Punto de entrada principal.
     """
 
     # ======================================================
@@ -50,28 +53,26 @@ def main():
     Header.render()
 
     # ======================================================
-    # DATASETS
+    # SIDEBAR
     # ======================================================
 
-    selector = DatasetSelector()
+    Sidebar.render(
+        dataset_manager.get_active_dataset()
+    )
 
-    datasets = selector.list_datasets()
+    # ======================================================
+    # DATASET ACTIVO
+    # ======================================================
 
-    if not datasets:
+    dataset = dataset_manager.get_active_dataset()
+
+    if not dataset.exists():
 
         st.error(
-            "No existen datasets disponibles."
+            "No existe un dataset activo."
         )
 
         return
-
-    dataset = st.sidebar.selectbox(
-        "Seleccione un Dataset",
-        datasets,
-        format_func=lambda x: x.name,
-    )
-
-    Sidebar.render(dataset)
 
     # ======================================================
     # BOTÓN ANALIZAR
@@ -101,7 +102,7 @@ def main():
         st.rerun()
 
     # ======================================================
-    # MOSTRAR ÚLTIMO ANÁLISIS
+    # RESULTADO
     # ======================================================
 
     result = SessionManager.analysis_result()
@@ -109,14 +110,14 @@ def main():
     if result is None:
 
         st.info(
-            "Selecciona un dataset y pulsa "
+            "Seleccione un dataset y pulse "
             "'Analizar Dataset'."
         )
 
         return
 
     # ======================================================
-    # FRONTEND V2
+    # MAIN LAYOUT
     # ======================================================
 
     MainLayout.render(

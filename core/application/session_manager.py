@@ -1,10 +1,10 @@
 """
 core/application/session_manager.py
 
-Administrador del estado de la sesión.
+Administrador del estado global de Streamlit.
 
-Centraliza toda la información que vive en
-st.session_state.
+Centraliza toda la información almacenada
+en st.session_state.
 
 Autor: Edgar Arteaga
 """
@@ -17,10 +17,15 @@ from core.application.application_service import (
     ApplicationService,
 )
 
+from core.ingestion.dataset_manager import (
+    DatasetManager,
+)
+
 
 class SessionManager:
     """
-    Administra el estado global de Streamlit.
+    Administra el estado global
+    de la aplicación.
     """
 
     # =====================================================
@@ -36,9 +41,21 @@ class SessionManager:
                 ApplicationService()
             )
 
+        # -------------------------------------------------
+
+        if "dataset_manager" not in st.session_state:
+
+            st.session_state.dataset_manager = (
+                DatasetManager()
+            )
+
+        # -------------------------------------------------
+
         if "analysis_result" not in st.session_state:
 
             st.session_state.analysis_result = None
+
+        # -------------------------------------------------
 
         if "chat_history" not in st.session_state:
 
@@ -52,6 +69,15 @@ class SessionManager:
     def app():
 
         return st.session_state.app_service
+
+    # =====================================================
+    # DATASET MANAGER
+    # =====================================================
+
+    @staticmethod
+    def dataset_manager():
+
+        return st.session_state.dataset_manager
 
     # =====================================================
     # ANALYSIS RESULT

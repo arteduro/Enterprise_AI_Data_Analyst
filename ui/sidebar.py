@@ -12,6 +12,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from ui.dataset_panel import DatasetPanel
+
 
 class Sidebar:
     """
@@ -19,9 +21,15 @@ class Sidebar:
     """
 
     @staticmethod
-    def render(selected_dataset: Path | None = None) -> None:
+    def render(
+        selected_dataset: Path | None = None,
+    ) -> None:
 
         with st.sidebar:
+
+            # ======================================================
+            # CABECERA
+            # ======================================================
 
             st.title("🤖 IA Empresarial")
 
@@ -37,19 +45,19 @@ class Sidebar:
 
             st.divider()
 
-            st.subheader("📁 Conjunto de datos")
+            # ======================================================
+            # DATASETS
+            # ======================================================
 
-            if selected_dataset is None:
-
-                st.info("Ningún dataset seleccionado.")
-
-            else:
-
-                st.success(selected_dataset.name)
-
-                st.caption(str(selected_dataset))
+            selected_dataset = DatasetPanel.render(
+                selected_dataset
+            )
 
             st.divider()
+
+            # ======================================================
+            # MÓDULOS
+            # ======================================================
 
             st.subheader("⚙️ Módulos")
 
@@ -79,4 +87,8 @@ class Sidebar:
 
             st.divider()
 
-            st.caption("Versión 0.2.0")
+            # ======================================================
+            # VERSIÓN
+            # ======================================================
+
+            st.caption("Versión 0.3.1")

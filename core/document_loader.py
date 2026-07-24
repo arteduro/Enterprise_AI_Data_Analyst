@@ -16,6 +16,7 @@ from core.exceptions import (
     DatasetNotFoundError,
     InvalidDatasetFormatError,
 )
+from core.ingestion.dataset_manager import DatasetManager
 
 logger = get_logger(__name__)
 
@@ -25,8 +26,6 @@ class DocumentLoader:
     Cargador universal de documentos.
     """
 
-    DATASET_FOLDER = Path("datasets")
-
     SUPPORTED_FORMATS = {
         ".csv",
         ".xlsx",
@@ -34,6 +33,10 @@ class DocumentLoader:
         ".json",
         ".parquet",
     }
+
+    # ---------------------------------------------------------
+    # Carga de archivos
+    # ---------------------------------------------------------
 
     def load(
         self,
@@ -72,38 +75,31 @@ class DocumentLoader:
             f"No fue posible cargar {path}"
         )
 
+    # ---------------------------------------------------------
+    # Descubrimiento de datasets
+    # ---------------------------------------------------------
+
     def find_datasets(self) -> list[Path]:
         """
-        Devuelve todos los datasets encontrados.
+        Obtiene todos los datasets disponibles
+        mediante DatasetManager.
         """
 
-        datasets = []
+        manager = DatasetManager()
 
-        if not self.DATASET_FOLDER.exists():
-            return datasets
-
-        for extension in self.SUPPORTED_FORMATS:
-
-            datasets.extend(
-                self.DATASET_FOLDER.glob(f"*{extension}")
-            )
-
-        return sorted(datasets)
+        return manager.list_available_datasets()
 
     def find_first_dataset(self) -> Path:
         """
         Devuelve el primer dataset disponible.
         """
 
-        datasets = self.find_datasets()
+        manager = DatasetManager()
 
-        if not datasets:
-            raise DatasetNotFoundError(
-                "No se encontró ningún dataset."
-            )
+        dataset = manager.find_first_dataset()
 
         logger.info(
-            f"Dataset encontrado: {datasets[0].name}"
+            f"Dataset encontrado: {dataset.name}"
         )
 
-        return datasets[0]
+        return dataset
